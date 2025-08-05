@@ -109,8 +109,7 @@ body {
 .social-text {
     flex: 1;
     min-width: 300px;
-    display: flex;
-    justify-content: flex-end;
+    
 }
 
 .social-text h2 {
