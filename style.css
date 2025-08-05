@@ -138,7 +138,7 @@ body {
     flex-direction: column;
     gap: 15px;
     /* --- AÑADE ESTA LÍNEA PARA EL AJUSTE --- */
-    margin-right: 50px; /* Prueba con 50px, puedes ajustar este número */
+    margin-right: 80px; /* Prueba con 50px, puedes ajustar este número */
 }
 
 .social-links li a {
