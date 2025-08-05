@@ -1,4 +1,3 @@
-// Se ejecuta cuando todo el contenido del HTML se ha cargado
 document.addEventListener('DOMContentLoaded', function() {
     
     // --- LÓGICA PARA EL MENÚ DE HAMBURGUESA ---
@@ -11,15 +10,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- LÓGICA PARA CARGAR PRODUCTOS DESDE GOOGLE SHEETS ---
+    // --- LÓGICA PARA LA TIENDA ---
     
-    // URL de tu hoja de cálculo de Google Sheets publicada como CSV
     const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?output=csv';
-
-    // Obtenemos el contenedor donde irán los productos
     const productContainer = document.getElementById('product-list');
+    const filterContainer = document.querySelector('.filter-container');
+    
+    let allProducts = []; // Array para guardar todos los productos
 
-    // Verificamos que el contenedor de productos exista en la página actual
     if (productContainer) {
         fetch(sheetURL)
             .then(response => response.text())
@@ -28,36 +26,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 rows.forEach(row => {
                     const columns = row.split(',');
-
-                    // Asegurarnos de que la fila no esté vacía
-                    if (columns.length > 1) {
-                        const id = columns[0];
-                        const nombre = columns[1];
-                        const categoria = columns[2];
-                        const descripcion = columns[3];
-                        const precioAnterior = columns[4];
-                        const precioActual = columns[5];
-                        const rutaImagen = columns[6];
-                        const stock = columns[7];
-                        const estado = columns[8] ? columns[8].trim() : '';
-
-                        if (estado === 'Activo') {
-                            const productCardHTML = `
-                                <div class="product-card">
-                                    <img src="${rutaImagen}" alt="${nombre}">
-                                    <p class="category">${categoria}</p>
-                                    <h3>${nombre}</h3>
-                                    <p class="description">${descripcion}</p>
-                                    <div class="price-container">
-                                        ${precioAnterior ? `<span class="old-price">S/ ${precioAnterior}</span>` : ''}
-                                        <span class="current-price">S/ ${precioActual}</span>
-                                    </div>
-                                </div>
-                            `;
-                            productContainer.innerHTML += productCardHTML;
-                        }
+                    if (columns.length > 1 && columns[8].trim() === 'Activo') {
+                        const product = {
+                            id: columns[0],
+                            nombre: columns[1],
+                            categoria: columns[2],
+                            descripcion: columns[3],
+                            precioAnterior: columns[4],
+                            precioActual: columns[5],
+                            rutaImagen: columns[6]
+                        };
+                        allProducts.push(product);
                     }
                 });
+                
+                displayProducts(allProducts); // Muestra todos los productos inicialmente
+                createCategoryFilters(); // Crea los botones de filtro
             })
             .catch(error => {
                 console.error('Error al cargar los productos:', error);
@@ -65,14 +49,86 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Se ejecuta cuando todo el HTML se ha cargado obtiene el año actual en el footer
-      
-            // --- LÓGICA PARA EL AÑO DINÁMICO DEL FOOTER ---
-            const yearSpan = document.getElementById('current-year');
-            if (yearSpan) {
-                const currentYear = new Date().getFullYear();
-                yearSpan.textContent = currentYear;
-            }
+    function displayProducts(products) {
+        productContainer.innerHTML = ''; // Limpia el contenedor
+        products.forEach(product => {
+            const productCardHTML = `
+                <a href="product.html?id=${product.id}" class="product-card-link">
+                    <div class="product-card">
+                        <img src="${product.rutaImagen}" alt="${product.nombre}">
+                        <p class="category">${product.categoria}</p>
+                        <h3>${product.nombre}</h3>
+                        <p class="description">${product.descripcion}</p>
+                        <div class="price-container">
+                            ${product.precioAnterior ? `<span class="old-price">S/ ${product.precioAnterior}</span>` : ''}
+                            <span class="current-price">S/ ${product.precioActual}</span>
+                        </div>
+                        <button class="add-to-cart-btn" data-product-id="${product.id}">Añadir al carrito</button>
+                    </div>
+                </a>
+            `;
+            productContainer.innerHTML += productCardHTML;
+        });
+        
+        setupCardAnimations(); // Activa las animaciones para las tarjetas recién creadas
+    }
 
-       // fin de Se ejecuta cuando todo el HTML se ha cargado obtiene el año actual en el footer
+    function createCategoryFilters() {
+        const categories = ['TODO', ...new Set(allProducts.map(product => product.categoria))];
+        filterContainer.innerHTML = ''; // Limpia los filtros existentes
+
+        categories.forEach(category => {
+            const button = document.createElement('button');
+            button.className = 'filter-btn';
+            button.innerText = category;
+            button.dataset.category = category;
+            if (category === 'TODO') {
+                button.classList.add('active');
+            }
+            button.addEventListener('click', handleFilterClick);
+            filterContainer.appendChild(button);
+        });
+    }
+    
+    function handleFilterClick(event) {
+        const selectedCategory = event.target.dataset.category;
+
+        // Actualiza el botón activo
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        if (selectedCategory === 'TODO') {
+            displayProducts(allProducts);
+        } else {
+            const filteredProducts = allProducts.filter(product => product.categoria === selectedCategory);
+            displayProducts(filteredProducts);
+        }
+    }
+
+    function setupCardAnimations() {
+        const cards = document.querySelectorAll('.product-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); // Para que la animación ocurra solo una vez
+                }
+            });
+        }, {
+            threshold: 0.1 // La animación se dispara cuando el 10% de la tarjeta es visible
+        });
+
+        cards.forEach(card => {
+            observer.observe(card);
+        });
+    }
+    
+    // --- LÓGICA PARA EL AÑO DINÁMICO DEL FOOTER ---
+    const yearSpan = document.getElementById('current-year');
+    if (yearSpan) {
+        const currentYear = new Date().getFullYear();
+        yearSpan.textContent = currentYear;
+    }
 });
