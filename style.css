@@ -184,3 +184,113 @@ body {
 .main-footer a { color: #3498db; text-decoration: none; font-weight: bold; transition: color 0.3s ease; }
 .main-footer a:hover { color: #5dade2; }
 
+/* --- ESTILOS DE LA PÁGINA DE DETALLE DE PRODUCTO --- */
+.product-detail-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap; /* Para que se apilen en móvil */
+    gap: 40px;
+}
+
+/* Columna Izquierda: Galería de Imágenes */
+.product-gallery {
+    flex: 1;
+    min-width: 300px;
+}
+
+.main-image-container {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.main-image-container img {
+    width: 100%;
+    display: block;
+}
+
+.thumbnail-container {
+    display: flex;
+    gap: 10px;
+}
+
+.thumbnail-container img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.thumbnail-container img:hover, .thumbnail-container img.active {
+    border-color: #007bff; /* Resalta la miniatura activa o al pasar el ratón */
+}
+
+/* Columna Derecha: Información del Producto */
+.product-info {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-info .product-code {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 15px;
+}
+
+.product-info h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.product-info .description-full {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Ocupa el espacio disponible */
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#whatsapp-btn {
+    background-color: #25D366;
+    color: white;
+    text-decoration: none;
+    padding: 15px 20px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+#whatsapp-btn:hover {
+    background-color: #1EBE57;
+}
+
+/* --- ESTILOS DE LA SECCIÓN DE PRODUCTOS RELACIONADOS --- */
+.related-products-section {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 20px;
+}
+
+.related-products-section h2 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
