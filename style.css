@@ -135,3 +135,8 @@ body {
 .main-footer .copyright { font-size: 14px; color: #bdc3c7; }
 .main-footer a { color: #3498db; text-decoration: none; font-weight: bold; transition: color 0.3s ease; }
 .main-footer a:hover { color: #5dade2; }
+
+/* --- PRUEBA DE DIAGNÓSTICO PARA CENTRADO --- */
+.social-container {
+    border: 5px solid red !important;
+}
