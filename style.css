@@ -208,3 +208,40 @@ body {
     font-weight: bold;
     color: #007bff;
 }
+
+/* --- ESTILOS DEL FOOTER --- */
+.main-footer {
+    background-color: #2c3e50; /* Un color oscuro y elegante */
+    color: #ecf0f1; /* Un color de texto claro que contrasta bien */
+    padding: 30px 20px;
+    margin-top: 50px; /* Le da espacio respecto al contenido de arriba */
+    text-align: center;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.main-footer p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.main-footer .copyright {
+    font-size: 14px;
+    color: #bdc3c7; /* Un gris un poco más sutil */
+}
+
+.main-footer a {
+    color: #3498db; /* Un azul brillante para el enlace */
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.main-footer a:hover {
+    color: #5dade2; /* Un azul más claro al pasar el ratón */
+}
+
+/* --- fin ESTILOS DEL FOOTER --- */

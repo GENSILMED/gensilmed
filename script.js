@@ -64,4 +64,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 productContainer.innerHTML = '<p>No se pudieron cargar los productos. Inténtalo de nuevo más tarde.</p>';
             });
     }
+
+    // Se ejecuta cuando todo el HTML se ha cargado obtiene el año actual en el footer
+      
+            // --- LÓGICA PARA EL AÑO DINÁMICO DEL FOOTER ---
+            const yearSpan = document.getElementById('current-year');
+            if (yearSpan) {
+                const currentYear = new Date().getFullYear();
+                yearSpan.textContent = currentYear;
+            }
+
+       // fin de Se ejecuta cuando todo el HTML se ha cargado obtiene el año actual en el footer
 });
