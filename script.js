@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             descripcion: columns[3],
                             precioAnterior: columns[4],
                             precioActual: columns[5],
-                            rutaImagen: columns[6]
+                            rutaImagen: columns[6],
+                            etiqueta: columns[9] ? columns[9].trim() : ''
                         };
                         allProducts.push(product);
                     }
@@ -50,28 +51,57 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayProducts(products) {
-        productContainer.innerHTML = ''; // Limpia el contenedor
-        products.forEach(product => {
-            const productCardHTML = `
-                <a href="product.html?id=${product.id}" class="product-card-link">
-                    <div class="product-card">
-                        <img src="${product.rutaImagen}" alt="${product.nombre}">
-                        <p class="category">${product.categoria}</p>
-                        <h3>${product.nombre}</h3>
-                        <p class="description">${product.descripcion}</p>
-                        <div class="price-container">
-                            ${product.precioAnterior ? `<span class="old-price">S/ ${product.precioAnterior}</span>` : ''}
-                            <span class="current-price">S/ ${product.precioActual}</span>
-                        </div>
-                        <button class="add-to-cart-btn" data-product-id="${product.id}">Añadir al carrito</button>
-                    </div>
-                </a>
-            `;
-            productContainer.innerHTML += productCardHTML;
-        });
+    productContainer.innerHTML = ''; // Limpia el contenedor
+    products.forEach(product => {
+        // Obtenemos la clase de color correcta para la etiqueta
+        const badgeClass = getBadgeClass(product.etiqueta);
         
-        setupCardAnimations(); // Activa las animaciones para las tarjetas recién creadas
+        // Creamos el HTML de la etiqueta solo si hay texto para ella
+        let badgeHTML = '';
+        if (product.etiqueta) {
+            badgeHTML = `<div class="product-badge ${badgeClass}">${product.etiqueta}</div>`;
+        }
+
+        const productCardHTML = `
+            <a href="product.html?id=${product.id}" class="product-card-link">
+                <div class="product-card">
+                    <div class="image-container">
+                        <img src="${product.rutaImagen}" alt="${product.nombre}">
+                        ${badgeHTML} 
+                    </div>
+                    <p class="category">${product.categoria}</p>
+                    <h3>${product.nombre}</h3>
+                    <p class="description">${product.descripcion}</p>
+                    <div class="price-container">
+                        ${product.precioAnterior ? `<span class="old-price">S/ ${product.precioAnterior}</span>` : ''}
+                        <span class="current-price">S/ ${product.precioActual}</span>
+                    </div>
+                    <button class="add-to-cart-btn" data-product-id="${product.id}">Añadir al carrito</button>
+                </div>
+            </a>
+        `;
+        productContainer.innerHTML += productCardHTML;
+    });
+    
+    setupCardAnimations();
+}
+
+// Función para determinar la clase de CSS basada en el texto de la etiqueta
+function getBadgeClass(text) {
+    if (!text) return ''; // Si no hay texto, no hay clase
+
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText === 'nuevo') {
+        return 'badge-nuevo';
+    } else if (lowerText === 'oferta') {
+        return 'badge-oferta';
+    } else if (lowerText.includes('descuento')) {
+        return 'badge-descuento';
+    } else {
+        return 'badge-otro';
     }
+}
 
     function createCategoryFilters() {
         const categories = ['TODO', ...new Set(allProducts.map(product => product.categoria))];

@@ -322,3 +322,42 @@ body {
 .main-footer a:hover {
     color: #5dade2;
 }
+
+/* --- ESTILOS PARA LA ETIQUETA DE PRODUCTO --- */
+
+/* Contenedor para posicionar la etiqueta sobre la imagen */
+.image-container {
+    position: relative;
+}
+
+/* Estilo base de la etiqueta */
+.product-badge {
+    position: absolute; /* Posicionamiento sobre la imagen */
+    top: 15px;
+    left: 15px;
+    padding: 6px 12px;
+    border-radius: 15px; /* Bordes redondeados */
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Colores dinámicos basados en la clase */
+.product-badge.badge-nuevo {
+    background-color: #28a745; /* Verde */
+}
+
+.product-badge.badge-oferta {
+    background-color: #ffc107; /* Amarillo */
+    color: #333; /* Texto oscuro para que contraste con el amarillo */
+}
+
+.product-badge.badge-descuento {
+    background-color: #dc3545; /* Rojo */
+}
+
+.product-badge.badge-otro {
+    background-color: #fd7e14; /* Naranja */
+}
