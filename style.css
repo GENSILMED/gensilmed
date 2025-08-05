@@ -89,20 +89,18 @@ body {
 .add-to-cart-btn:hover { background-color: #c82333; }
 
 /* --- ESTILOS DE LA SECCIÓN DE REDES SOCIALES (PRE-FOOTER) --- */
+
+/* Al bloque negro principal solo le damos color y el espaciado interno. */
 .social-section {
-    /* CAMBIO: Modificado a negro RGB */
-    background-color:#2c3e50; 
+    background-color: rgb(0, 0, 0); 
     color: #ecf0f1;
     padding: 50px 30px;
-    /* CORRECCIÓN: Se añade este `display: flex` para ayudar al centrado del contenido interno */
-    display: flex;
-    justify-content: center;
 }
 
+/* A su contenedor interno le damos el ancho máximo y lo centramos. */
 .social-container {
-    max-width: 1200px;
-    width: 100%; /* Asegura que el contenedor ocupe el ancho disponible hasta el máximo */
-    margin: 0 auto; /* CORRECCIÓN: Esta línea centra el contenedor */
+    max-width: 1200px; /* Define el ancho máximo del contenido */
+    margin: 0 auto;    /* ¡Esta es la línea mágica que lo centra horizontalmente! */
     display: flex;
     justify-content: space-between;
     align-items: center;
