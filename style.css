@@ -109,20 +109,21 @@ body {
 .social-text {
     flex: 1;
     min-width: 300px;
-    
+    display: flex;
+    justify-content: flex-end;
 }
 
 .social-text h2 {
     font-size: 32px;
     margin-bottom: 10px;
-    justify-content: flex-end;
+    
 }
 
 .social-text p {
     font-size: 16px;
     color: #bdc3c7;
     max-width: 400px;
-    justify-content: flex-end;
+    
 }
 
 .social-links {
