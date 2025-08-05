@@ -111,7 +111,7 @@ body {
 .social-text { flex: 1; min-width: 300px; display: flex; justify-content: flex-end; }
 .social-text h2 { font-size: 32px; margin-bottom: 10px; }
 .social-text p { font-size: 16px; color: #bdc3c7; max-width: 400px; }
-.social-links { flex: 1; min-width: 300px; }
+.social-links { flex: 1; min-width: 300px; display: flex; justify-content: flex-end; }
 .social-links ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 15px; }
 .social-links li a { color: #ecf0f1; text-decoration: none; font-size: 18px; display: flex; align-items: center; transition: color 0.3s ease; }
 .social-links li a i { font-size: 24px; width: 40px; margin-right: 15px; text-align: center; transition: color 0.3s ease; }
