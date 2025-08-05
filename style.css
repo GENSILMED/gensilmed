@@ -108,7 +108,7 @@ body {
     gap: 30px;
 }
 
-.social-text { flex: 1; min-width: 300px; }
+.social-text { flex: 1; min-width: 300px; display: flex; justify-content: flex-end; }
 .social-text h2 { font-size: 32px; margin-bottom: 10px; }
 .social-text p { font-size: 16px; color: #bdc3c7; max-width: 400px; }
 .social-links { flex: 1; min-width: 300px; }
@@ -136,7 +136,3 @@ body {
 .main-footer a { color: #3498db; text-decoration: none; font-weight: bold; transition: color 0.3s ease; }
 .main-footer a:hover { color: #5dade2; }
 
-/* --- PRUEBA DE DIAGNÓSTICO PARA CENTRADO --- */
-.social-container {
-    border: 5px solid red !important;
-}
