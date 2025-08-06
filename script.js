@@ -1,6 +1,112 @@
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- LÓGICA DEL CARRITO DE COMPRAS ---
+    // --- URLs DE CONFIGURACIÓN ---
+    const productsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?output=csv';
+    // Pega aquí la NUEVA URL de tu hoja "Configuracion"
+    const configURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?gid=1964441751&single=true&output=csv'; 
+
+    // --- VARIABLES GLOBALES ---
+    let allProducts = [];
+    let siteConfig = {};
+
+    // --- FUNCIÓN PARA CARGAR TODOS LOS DATOS (PRODUCTOS Y CONFIG) ---
+    function loadAllData() {
+        // Usamos Promise.all para hacer ambas peticiones al mismo tiempo
+        Promise.all([
+            fetch(productsURL).then(res => res.text()),
+            fetch(configURL).then(res => res.text())
+        ])
+        .then(([productsCSV, configCSV]) => {
+            // Parseamos los productos
+            Papa.parse(productsCSV, {
+                header: true,
+                complete: function(results) {
+                    allProducts = results.data.filter(p => p.Estado === 'Activo' && p.ID_Producto);
+                }
+            });
+
+            // Parseamos la configuración y la convertimos en un objeto fácil de usar
+            Papa.parse(configCSV, {
+                header: true,
+                complete: function(results) {
+                    results.data.forEach(item => {
+                        siteConfig[item.Clave] = item;
+                    });
+                }
+            });
+
+            // Cuando todo esté listo, disparamos el evento
+            document.dispatchEvent(new CustomEvent('dataLoaded'));
+        })
+        .catch(error => console.error('Error al cargar los datos:', error));
+    }
+
+    // --- FUNCIÓN PARA APLICAR LA CONFIGURACIÓN AL SITIO ---
+    function applySiteConfig() {
+        // Llenamos los datos de Yape/Plin
+        const yapeNum = document.getElementById('yape-plin-numbers');
+        const yapeNames = document.getElementById('yape-plin-names');
+        if (yapeNum && siteConfig.yape_numero) {
+            yapeNum.textContent = `Yape: ${siteConfig.yape_numero.Valor1} / Plin: ${siteConfig.plin_numero.Valor1}`;
+            yapeNames.textContent = `Yape: ${siteConfig.yape_titular.Valor2} / Plin: ${siteConfig.plin_titular.Valor2}`;
+        }
+        
+        // Llenamos los datos de los bancos
+        const bancoNacion = document.getElementById('banco-nacion-numero');
+        if (bancoNacion && siteConfig.banco_nacion_numero) {
+            bancoNacion.textContent = siteConfig.banco_nacion_numero.Valor1;
+        }
+        const bancoBcp = document.getElementById('banco-bcp-numero');
+        if (bancoBcp && siteConfig.banco_bcp_numero) {
+            bancoBcp.textContent = siteConfig.banco_bcp_numero.Valor1;
+        }
+        const bancoTitular = document.getElementById('banco-titular');
+        if (bancoTitular && siteConfig.banco_titular) {
+            bancoTitular.textContent = `A nombre de ${siteConfig.banco_titular.Valor2}`;
+        }
+
+        // Actualizamos los enlaces de redes sociales (buscando todos los que tengan el atributo)
+        document.querySelectorAll('a[data-social]').forEach(link => {
+            const socialNetwork = link.dataset.social;
+            if (siteConfig[`${socialNetwork}_enlace`]) {
+                link.href = siteConfig[`${socialNetwork}_enlace`].Valor1;
+            }
+        });
+
+        // Actualizamos el botón de WhatsApp del producto
+        const productWhatsappBtn = document.getElementById('whatsapp-btn');
+        if (productWhatsappBtn && siteConfig.whatsapp_numero) {
+            const oldHref = productWhatsappBtn.href;
+            const message = oldHref.split('text=')[1] || '';
+            productWhatsappBtn.href = `https://wa.me/${siteConfig.whatsapp_numero.Valor1}?text=${message}`;
+        }
+        
+        // Actualizamos el WhatsApp del carrito
+        const cartWhatsappBtn = document.getElementById('whatsapp-checkout-btn');
+         if (cartWhatsappBtn && siteConfig.whatsapp_numero) {
+            const oldHref = cartWhatsappBtn.href;
+            const message = oldHref.split('text=')[1] || '';
+            cartWhatsappBtn.href = `https://wa.me/${siteConfig.whatsapp_numero.Valor1}?text=${message}`;
+        }
+    }
+    
+    // Ejecutamos la carga de datos al iniciar
+    loadAllData();
+    
+    // Cuando los datos estén listos, aplicamos la configuración y la lógica de cada página
+    document.addEventListener('dataLoaded', () => {
+        applySiteConfig();
+
+        if (productContainer) {
+            displayProducts(allProducts);
+            createCategoryFilters();
+        }
+        if (productDetailContainer) {
+            initializeProductDetailPage();
+        }
+    });
+
+// --- LÓGICA DEL CARRITO DE COMPRAS ---
     const cartIcon = document.querySelector('.cart-icon');
     const cartCounter = document.querySelector('.cart-counter');
     const cartModal = document.getElementById('cart-modal');
@@ -145,8 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- LÓGICA UNIVERSAL DE LA TIENDA ---
-    const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?output=csv';
-    let allProducts = [];
+  
 
     fetch(sheetURL)
         .then(response => response.text())
