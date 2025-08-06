@@ -539,3 +539,61 @@ input[type=number]::-webkit-outer-spin-button {
     background-color: #1EBE57;
 }
 
+/* --- ESTILOS PÁGINA DE CONTACTO --- */
+.contact-page-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.contact-page-container h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.contact-page-container p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 40px;
+}
+
+.contact-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.contact-card {
+    background-color: #fff;
+    padding: 40px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.contact-card i {
+    font-size: 48px;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.contact-card h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.contact-card span {
+    color: #007bff;
+    font-weight: bold;
+    margin-top: 15px;
+    display: inline-block;
+}
+

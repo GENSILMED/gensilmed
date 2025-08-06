@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GENSILMED - Tienda Virtual</title>
+    <title>Contacto - GENSILMED</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-    
 </head>
 <body>
 
@@ -18,7 +17,6 @@
                 <img src="imagenes/logo.png" alt="Logo GENSILMED" class="logo-img">
                 <span class="logo-name">GENSILMED</span>
             </a>
-
             <nav class="nav-menu">
                 <ul>
                     <li><a href="contacto.html">Contacto</a></li>
@@ -30,27 +28,35 @@
                     </li>
                 </ul>
             </nav>
-
-            <div class="hamburger-menu">
-                <i class="fas fa-bars"></i>
-            </div>
+            <div class="hamburger-menu"><i class="fas fa-bars"></i></div>
         </div>
     </header>
 
-    <section class="hero-banner">
-        <img src="imagenes/banner-tienda.jpeg" alt="Promociones de la tienda GENSILMED">
-    </section>
-
     <main>
-        <section class="product-section">
-            <h1>Nuestros Productos</h1>
-
-            <div class="filter-container">
-            <button class="filter-btn active" data-category="TODO">TODO</button>
+        <div class="contact-page-container">
+            <h1>Contáctanos</h1>
+            <p>Estamos aquí para ayudarte. Elige tu método de contacto preferido.</p>
+            <div class="contact-options">
+                <a href="https://wa.me/51987654321" class="contact-card" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-whatsapp"></i>
+                    <h3>WhatsApp</h3>
+                    <p>+51 987 654 321</p>
+                    <span>Envíanos un mensaje</span>
+                </a>
+                <a href="mailto:tu-correo@ejemplo.com" class="contact-card">
+                    <i class="far fa-envelope"></i>
+                    <h3>Correo Electrónico</h3>
+                    <p>tu-correo@ejemplo.com</p>
+                    <span>Escríbenos un email</span>
+                </a>
+                <a href="https://www.instagram.com/tu-usuario" class="contact-card" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-instagram"></i>
+                    <h3>Instagram</h3>
+                    <p>@gensilmed</p>
+                    <span>Síguenos y envíanos un DM</span>
+                </a>
             </div>
-            <div id="product-list" class="product-container">
-            </div>
-        </section>
+        </div>
     </main>
     
     <section class="social-section">
@@ -125,7 +131,7 @@
 
         </div>
     </div>
-
+    
     <script src="script.js"></script>
 </body>
 </html>
