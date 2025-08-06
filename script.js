@@ -8,197 +8,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const cartItemsContainer = document.getElementById('cart-items-container');
     const cartTotalPriceEl = document.getElementById('cart-total-price');
     const whatsappCheckoutBtn = document.getElementById('whatsapp-checkout-btn');
-
-    // Carga el carrito desde localStorage o lo inicializa como un array vacío
-    let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-
-    function saveCart() {
-        localStorage.setItem('shoppingCart', JSON.stringify(cart));
-    }
-
-    function updateCartUI() {
-        cartCounter.textContent = cart.reduce((sum, item) => sum + item.cantidad, 0); // Suma las cantidades
-        cartCounter.style.display = cart.length > 0 ? 'flex' : 'none'; // Muestra/oculta el contador
-
-        if (cart.length === 0) {
-            cartItemsContainer.innerHTML = '<p>Tu carrito está vacío.</p>';
-            cartTotalPriceEl.textContent = 'S/ 0.00';
-            whatsappCheckoutBtn.style.display = 'none';
-            return;
-        }
-
-        whatsappCheckoutBtn.style.display = 'inline-flex';
-        cartItemsContainer.innerHTML = '';
-        let totalPrice = 0;
-
-        cart.forEach(item => {
-            const itemSubtotal = parseFloat(item.precio) * item.cantidad;
-            totalPrice += itemSubtotal;
-            const cartItemHTML = `
-                <div class="cart-item">
-                    <img src="${item.imagen}" alt="${item.nombre}">
-                    <div class="cart-item-info">
-                        <h4>${item.nombre}</h4>
-                        <p>Código: ${item.id}</p>
-                        <p>Precio: S/ ${parseFloat(item.precio).toFixed(2)} x ${item.cantidad}</p>
-                        <p><strong>Subtotal: S/ ${itemSubtotal.toFixed(2)}</strong></p>
-                    </div>
-                </div>
-            `;
-            cartItemsContainer.innerHTML += cartItemHTML;
-        });
-
-        cartTotalPriceEl.textContent = `S/ ${totalPrice.toFixed(2)}`;
-        updateWhatsAppLink(totalPrice);
-    }
-
-    function updateWhatsAppLink(totalPrice) {
-        let message = 'Hola, estoy interesado en realizar el siguiente pedido:\n\n';
-        cart.forEach(item => {
-            message += `*Producto:* ${item.nombre}\n`;
-            message += `*Código:* ${item.id}\n`;
-            message += `*Cantidad:* ${item.cantidad}\n`;
-            message += `*Subtotal:* S/ ${(parseFloat(item.precio) * item.cantidad).toFixed(2)}\n\n`;
-        });
-        message += `*TOTAL DEL PEDIDO:* S/ ${totalPrice.toFixed(2)}`;
-        const whatsappURL = `https://wa.me/51987654321?text=${encodeURIComponent(message)}`;
-        whatsappCheckoutBtn.href = whatsappURL;
-    }
-
-    function addToCart(productId, quantity) {
-        const product = allProducts.find(p => p.ID_Producto === productId);
-        if (!product) return;
-        
-        const existingItem = cart.find(item => item.id === productId);
-
-        if (existingItem) {
-            existingItem.cantidad += quantity;
-        } else {
-            cart.push({
-                id: product.ID_Producto,
-                nombre: product.NombreProducto,
-                precio: product.PrecioActual,
-                imagen: product.RutaImagen,
-                cantidad: quantity
-            });
-        }
-        
-        saveCart();
-        updateCartUI();
-        alert('¡Producto añadido al carrito!');
-    }
-
-    // Event Listeners para abrir y cerrar el modal del carrito
-    if (cartIcon) {
-        cartIcon.addEventListener('click', (e) => {
-            e.preventDefault();
-            cartModal.classList.add('active');
-        });
-    }
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', () => cartModal.classList.remove('active'));
-    }
-    window.addEventListener('click', (e) => {
-        if (e.target === cartModal) cartModal.classList.remove('active');
-    });
-
-    // Delegación de eventos para todos los botones "Añadir al carrito"
-    document.addEventListener('click', (e) => {
-        if (e.target.matches('.add-to-cart-btn')) {
-            e.preventDefault();
-            const productId = e.target.dataset.productId;
-            const quantityInput = document.getElementById('quantity-input');
-            const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-            addToCart(productId, quantity);
-        }
-    });
-    
-    // --- LÓGICA PARA EL MENÚ DE HAMBURGUESA ---
-    const hamburgerMenu = document.querySelector('.hamburger-menu');
-    const navMenu = document.querySelector('.nav-menu');
-    if (hamburgerMenu && navMenu) {
-        hamburgerMenu.addEventListener('click', () => navMenu.classList.toggle('active'));
-    }
-
-    // --- LÓGICA UNIVERSAL DE LA TIENDA ---
-    const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?output=csv';
-    let allProducts = [];
-
-    // --- LÓGICA DE CARGA DE DATOS CON PAPA PARSE ---
-    fetch(sheetURL)
-        .then(response => response.text())
-        .then(csvText => {
-            Papa.parse(csvText, {
-                header: true,
-                complete: function(results) {
-                    allProducts = results.data.filter(p => p.Estado === 'Activo' && p.ID_Producto);
-                    document.dispatchEvent(new CustomEvent('productsLoaded'));
-                }
-            });
-        })
-        .catch(error => console.error('Error al cargar los productos:', error));
-
-    // --- LÓGICA PARA LA PÁGINA PRINCIPAL (INDEX.HTML) ---
-    const productContainer = document.getElementById('product-list');
-    const filterContainer = document.querySelector('.filter-container');
-    if (productContainer) {
-        document.addEventListener('productsLoaded', () => {
-            displayProducts(allProducts);
-            createCategoryFilters();
-        });
-    }
-    
-    function displayProducts(products) {
-        if (!productContainer) return;
-        productContainer.innerHTML = '';
-        products.forEach(product => {
-            productContainer.innerHTML += `
-                <a href="product.html?id=${product.ID_Producto}" class="product-card-link">
-                    <div class="product-card">
-                        <div class="image-container">
-                            <img src="${product.RutaImagen}" alt="${product.NombreProducto}">
-                            ${createBadgeHTML(product.Etiqueta)}
-                        </div>
-                        <p class="category">${product.Categoria}</p>
-                        <h3>${product.NombreProducto}</h3>
-                        <p class="description">${product.Descripcion}</p>
-                        <div class="price-container">
-                            ${product.PrecioAnterior ? `<span class="old-price">S/ ${product.PrecioAnterior}</span>` : ''}
-                            <span class="current-price">S/ ${product.PrecioActual}</span>
-                        </div>
-                        <button class="add-to-cart-btn" data-product-id="${product.ID_Producto}">Añadir al carrito</button>
-                    </div>
-                </a>
-            `;
-        });
-        setupCardAnimations();
-    }
-
-    // Actualización inicial del carrito al cargar la página
-    updateCartUI();
-});
-
-// Para evitar confusiones, aquí está el archivo COMPLETO y UNIFICADO. 
-// Reemplaza todo tu script.js con esto:
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // --- LÓGICA DEL CARRITO DE COMPRAS ---
-    const cartIcon = document.querySelector('.cart-icon');
-    const cartCounter = document.querySelector('.cart-counter');
-    const cartModal = document.getElementById('cart-modal');
-    const closeModalBtn = document.querySelector('.close-modal');
-    const cartItemsContainer = document.getElementById('cart-items-container');
-    const cartTotalPriceEl = document.getElementById('cart-total-price');
-    const whatsappCheckoutBtn = document.getElementById('whatsapp-checkout-btn');
+    const clearCartBtn = document.getElementById('clear-cart-btn'); // <-- NUEVO ELEMENTO
 
     let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
 
     function saveCart() {
         localStorage.setItem('shoppingCart', JSON.stringify(cart));
     }
+    
+    // --- NUEVA FUNCIÓN PARA VACIAR EL CARRITO ---
+    function clearCart() {
+        cart = []; // Vacía el array
+        saveCart(); // Guarda el carrito vacío en localStorage
+        updateCartUI(); // Actualiza la interfaz
+    }
 
     function updateCartUI() {
-        if (!cartCounter) return; // Si no hay elementos del carrito en la página, no hacer nada
+        if (!cartCounter) return;
 
         cartCounter.textContent = cart.reduce((sum, item) => sum + item.cantidad, 0);
         cartCounter.style.display = cart.length > 0 ? 'flex' : 'none';
@@ -209,10 +35,12 @@ document.addEventListener('DOMContentLoaded', function() {
             cartItemsContainer.innerHTML = '<p>Tu carrito está vacío.</p>';
             cartTotalPriceEl.textContent = 'S/ 0.00';
             if (whatsappCheckoutBtn) whatsappCheckoutBtn.style.display = 'none';
+            if (clearCartBtn) clearCartBtn.style.display = 'none'; // <-- Oculta el botón si el carrito está vacío
             return;
         }
 
         if (whatsappCheckoutBtn) whatsappCheckoutBtn.style.display = 'inline-flex';
+        if (clearCartBtn) clearCartBtn.style.display = 'inline-block'; // <-- Muestra el botón si hay items
         cartItemsContainer.innerHTML = '';
         let totalPrice = 0;
 
@@ -251,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function addToCart(productId, quantity) {
         const product = allProducts.find(p => p.ID_Producto === productId);
         if (!product) {
-            console.error("Producto no encontrado en allProducts:", productId);
+            console.error("Producto no encontrado:", productId);
             return;
         }
         
@@ -273,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('¡Producto añadido al carrito!');
     }
 
+    // Event Listeners del Carrito
     if (cartIcon) {
         cartIcon.addEventListener('click', (e) => {
             e.preventDefault();
@@ -281,6 +110,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', () => cartModal.classList.remove('active'));
+    }
+    if (clearCartBtn) { // <-- NUEVO EVENT LISTENER
+        clearCartBtn.addEventListener('click', clearCart);
     }
     window.addEventListener('click', (e) => {
         if (e.target === cartModal) cartModal.classList.remove('active');
@@ -486,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return `<div class="product-badge ${badgeClass}" style="${style}">${text}</div>`;
     }
 
+    // --- LÓGICA PARA EL AÑO DINÁMICO DEL FOOTER ---
     const yearSpan = document.getElementById('current-year');
     if (yearSpan) {
         const currentYear = new Date().getFullYear();
