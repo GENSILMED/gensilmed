@@ -262,8 +262,9 @@ body {
 
 .action-buttons {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 15px;
+    width: 100%;
 }
 
 #whatsapp-btn {
