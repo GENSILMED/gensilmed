@@ -237,6 +237,8 @@ body {
     min-width: 300px;
     display: flex;
     flex-direction: column;
+     /* --- AÑADE ESTA LÍNEA PARA CORREGIR LA ETIQUETA --- */
+    align-items: flex-start; /* Evita que los elementos se estiren al ancho completo */
 }
 
 .product-info .product-code {

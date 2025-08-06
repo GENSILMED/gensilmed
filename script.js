@@ -258,11 +258,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function createBadgeHTML(text, isDetailPage = false) {
-        if (!text) return '';
-        const badgeClass = getBadgeClass(text);
-        const style = isDetailPage ? 'position: static; display: inline-block; margin-bottom: 15px;' : '';
-        return `<div class="product-badge ${badgeClass}" style="${style}">${text}</div>`;
-    }
+    if (!text) return '';
+    const badgeClass = getBadgeClass(text);
+    // Ahora solo necesitamos un estilo simple para el margen en la página de detalle
+    const style = isDetailPage ? 'margin-bottom: 15px;' : '';
+    return `<div class="product-badge ${badgeClass}" style="${style}">${text}</div>`;
+}
 
     // --- LÓGICA PARA EL AÑO DINÁMICO DEL FOOTER ---
     const yearSpan = document.getElementById('current-year');
