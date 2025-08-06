@@ -5,9 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const navMenu = document.querySelector('.nav-menu');
 
     if (hamburgerMenu && navMenu) {
-        hamburgerMenu.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
-        });
+        hamburgerMenu.addEventListener('click', () => navMenu.classList.toggle('active'));
     }
 
     // --- LÓGICA UNIVERSAL DE LA TIENDA ---
@@ -15,38 +13,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?output=csv';
     let allProducts = [];
 
-    // --- LÓGICA DE CARGA DE DATOS ---
+    // --- NUEVA LÓGICA DE CARGA DE DATOS CON PAPA PARSE ---
     fetch(sheetURL)
         .then(response => response.text())
         .then(csvText => {
-            const rows = csvText.split('\n').slice(1);
-
-            rows.forEach(row => {
-                const columns = row.split(',');
-                if (columns.length > 8 && columns[8].trim() === 'Activo') {
-                    const product = {
-                        id: columns[0].trim(),           // Columna A
-                        nombre: columns[1].trim(),       // Columna B
-                        categoria: columns[2].trim(),    // Columna C
-                        descripcion: columns[3].trim(),  // Columna D
-                        precioAnterior: columns[4].trim(),// Columna E
-                        precioActual: columns[5].trim(), // Columna F
-                        rutaImagen: columns[6].trim(),   // Columna G
-                        stock: columns[7].trim(),        // Columna H (Aunque no lo usemos visualmente aún)
-                        estado: columns[8].trim(),       // Columna I
-                        etiqueta: columns[9] ? columns[9].trim() : '',     // Columna J
-                        imagen2: columns[10] ? columns[10].trim() : '',    // Columna K
-                        imagen3: columns[11] ? columns[11].trim() : '',    // Columna L
-                        imagen4: columns[12] ? columns[12].trim() : '',    // Columna M
-                        imagen5: columns[13] ? columns[13].trim() : '',    // Columna N
-                        colores: columns[14] ? columns[14].trim() : ''     // CORRECCIÓN: Columna O
-                    };
-                    allProducts.push(product);
+            Papa.parse(csvText, {
+                header: true, // ¡La clave! Usa la primera fila como nombres de propiedad
+                complete: function(results) {
+                    allProducts = results.data.filter(p => p.Estado === 'Activo');
+                    
+                    // Disparamos un evento personalizado para avisar que los productos ya se cargaron
+                    document.dispatchEvent(new CustomEvent('productsLoaded'));
                 }
             });
-            
-            // Disparamos un evento personalizado para avisar que los productos ya se cargaron
-            document.dispatchEvent(new CustomEvent('productsLoaded'));
         })
         .catch(error => console.error('Error al cargar los productos:', error));
 
@@ -61,37 +40,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // ... (El resto de las funciones como displayProducts, createCategoryFilters, handleFilterClick, etc., se quedan exactamente igual) ...
     function displayProducts(products) {
         if (!productContainer) return;
         productContainer.innerHTML = '';
         products.forEach(product => {
-            const productCardHTML = `
-                <a href="product.html?id=${product.id}" class="product-card-link">
+            productContainer.innerHTML += `
+                <a href="product.html?id=${product.ID_Producto}" class="product-card-link">
                     <div class="product-card">
                         <div class="image-container">
-                            <img src="${product.rutaImagen}" alt="${product.nombre}">
-                            ${createBadgeHTML(product.etiqueta)}
+                            <img src="${product.RutaImagen}" alt="${product.NombreProducto}">
+                            ${createBadgeHTML(product.Etiqueta)}
                         </div>
-                        <p class="category">${product.categoria}</p>
-                        <h3>${product.nombre}</h3>
-                        <p class="description">${product.descripcion}</p>
+                        <p class="category">${product.Categoria}</p>
+                        <h3>${product.NombreProducto}</h3>
+                        <p class="description">${product.Descripcion}</p>
                         <div class="price-container">
-                            ${product.precioAnterior ? `<span class="old-price">S/ ${product.precioAnterior}</span>` : ''}
-                            <span class="current-price">S/ ${product.precioActual}</span>
+                            ${product.PrecioAnterior ? `<span class="old-price">S/ ${product.PrecioAnterior}</span>` : ''}
+                            <span class="current-price">S/ ${product.PrecioActual}</span>
                         </div>
-                        <button class="add-to-cart-btn" data-product-id="${product.id}">Añadir al carrito</button>
+                        <button class="add-to-cart-btn" data-product-id="${product.ID_Producto}">Añadir al carrito</button>
                     </div>
                 </a>
             `;
-            productContainer.innerHTML += productCardHTML;
         });
         setupCardAnimations();
     }
 
     function createCategoryFilters() {
         if (!filterContainer) return;
-        const categories = ['TODO', ...new Set(allProducts.map(product => product.categoria))];
+        const categories = ['TODO', ...new Set(allProducts.map(product => product.Categoria))];
         filterContainer.innerHTML = '';
         categories.forEach(category => {
             const button = document.createElement('button');
@@ -108,10 +85,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedCategory = event.target.dataset.category;
         document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
         event.target.classList.add('active');
-        const filteredProducts = selectedCategory === 'TODO' ? allProducts : allProducts.filter(p => p.categoria === selectedCategory);
+        const filteredProducts = selectedCategory === 'TODO' ? allProducts : allProducts.filter(p => p.Categoria === selectedCategory);
         displayProducts(filteredProducts);
     }
-
 
     // --- LÓGICA PARA LA PÁGINA DE DETALLE DE PRODUCTO (PRODUCT.HTML) ---
     const productDetailContainer = document.getElementById('product-detail-content');
@@ -119,10 +95,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function initializeProductDetailPage() {
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
-        const product = allProducts.find(p => p.id === productId);
+        const product = allProducts.find(p => p.ID_Producto === productId);
 
         if (product) {
-            document.title = `${product.nombre} - GENSILMED`;
+            document.title = `${product.NombreProducto} - GENSILMED`;
             productDetailContainer.innerHTML = createProductDetailHTML(product);
             setupImageGallery(product);
             setupWhatsAppButton(product);
@@ -138,25 +114,22 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('productsLoaded', initializeProductDetailPage);
     }
     
-    // ... (El resto de las funciones para la página de detalle, como createProductDetailHTML, setupImageGallery, etc., se quedan exactamente igual) ...
     function createProductDetailHTML(product) {
         return `
             <div class="product-detail-container">
                 <div class="product-gallery">
-                    <div class="main-image-container">
-                        <img src="${product.rutaImagen}" alt="${product.nombre}" id="main-product-image">
-                    </div>
+                    <div class="main-image-container"><img src="${product.RutaImagen}" alt="${product.NombreProducto}" id="main-product-image"></div>
                     <div class="thumbnail-container" id="thumbnail-container"></div>
                 </div>
                 <div class="product-info">
-                    ${createBadgeHTML(product.etiqueta, true)}
-                    <h1>${product.nombre}</h1>
-                    <p class="product-code">Código: ${product.id}</p>
+                    ${createBadgeHTML(product.Etiqueta, true)}
+                    <h1>${product.NombreProducto}</h1>
+                    <p class="product-code">Código: ${product.ID_Producto}</p>
                     <div class="price-container" style="margin-bottom: 20px;">
-                        ${product.precioAnterior ? `<span class="old-price">S/ ${product.precioAnterior}</span>` : ''}
-                        <span class="current-price" id="product-price">S/ ${product.precioActual}</span>
+                        ${product.PrecioAnterior ? `<span class="old-price">S/ ${product.PrecioAnterior}</span>` : ''}
+                        <span class="current-price" id="product-price">S/ ${product.PrecioActual}</span>
                     </div>
-                    <p class="description-full">${product.descripcion}</p>
+                    <p class="description-full">${product.Descripcion}</p>
                     <div class="product-options">
                         <div class="color-options" id="color-options-container"></div>
                         <div class="quantity-section">
@@ -171,10 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     <div class="action-buttons">
-                        <button class="add-to-cart-btn" data-product-id="${product.id}">Añadir al carrito</button>
-                        <a href="#" id="whatsapp-btn" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-whatsapp"></i> Pedir por WhatsApp
-                        </a>
+                        <button class="add-to-cart-btn" data-product-id="${product.ID_Producto}">Añadir al carrito</button>
+                        <a href="#" id="whatsapp-btn" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Pedir por WhatsApp</a>
                     </div>
                 </div>
             </div>
@@ -185,10 +156,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setupColorSwatches(product) {
         const container = document.getElementById('color-options-container');
-        if (!product.colores) { container.style.display = 'none'; return; }
+        if (!product.Colores) { container.style.display = 'none'; return; }
         container.innerHTML = `<h4>Colores:</h4><div id="color-swatches"></div>`;
         const swatchesContainer = document.getElementById('color-swatches');
-        const colors = product.colores.split(',').map(c => c.trim());
+        const colors = product.Colores.split(',').map(c => c.trim());
         colors.forEach((colorName, index) => {
             const colorCode = colorMap[colorName.toLowerCase()] || colorName;
             const swatch = document.createElement('div');
@@ -204,17 +175,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function setupQuantityControls(product) {
+    function setupQuantityControls() {
         const decreaseBtn = document.getElementById('decrease-qty');
         const increaseBtn = document.getElementById('increase-qty');
         const quantityInput = document.getElementById('quantity-input');
         increaseBtn.addEventListener('click', () => { quantityInput.value = parseInt(quantityInput.value) + 1; });
         decreaseBtn.addEventListener('click', () => { if (parseInt(quantityInput.value) > 1) { quantityInput.value = parseInt(quantityInput.value) - 1; } });
     }
+
     function setupImageGallery(product) {
         const mainImage = document.getElementById('main-product-image');
         const thumbnailContainer = document.getElementById('thumbnail-container');
-        const images = [product.rutaImagen, product.imagen2, product.imagen3, product.imagen4, product.imagen5].filter(img => img);
+        const images = [product.RutaImagen, product.Imagen2, product.Imagen3, product.Imagen4, product.Imagen5].filter(img => img);
         thumbnailContainer.innerHTML = '';
         images.forEach((imgSrc, index) => {
             const thumb = document.createElement('img');
@@ -228,39 +200,40 @@ document.addEventListener('DOMContentLoaded', function() {
             thumbnailContainer.appendChild(thumb);
         });
     }
+
     function setupWhatsAppButton(product) {
         const whatsappBtn = document.getElementById('whatsapp-btn');
         if (whatsappBtn) {
-            const message = encodeURIComponent(`Hola, estoy interesado en el producto: ${product.nombre} (Código: ${product.id})`);
+            const message = encodeURIComponent(`Hola, estoy interesado en el producto: ${product.NombreProducto} (Código: ${product.ID_Producto})`);
             whatsappBtn.href = `https://wa.me/51987654321?text=${message}`;
         }
     }
+
     function displayRelatedProducts(currentProduct) {
         const relatedContainer = document.getElementById('related-product-list');
         if (!relatedContainer) return;
-        const relatedProducts = allProducts.filter(p => p.categoria === currentProduct.categoria && p.id !== currentProduct.id).slice(0, 4);
+        const relatedProducts = allProducts.filter(p => p.Categoria === currentProduct.Categoria && p.ID_Producto !== currentProduct.ID_Producto).slice(0, 4);
         if (relatedProducts.length > 0) {
             relatedContainer.innerHTML = '';
             relatedProducts.forEach(product => {
-                relatedContainer.innerHTML += `<a href="product.html?id=${product.id}" class="product-card-link"><div class="product-card"><div class="image-container"><img src="${product.rutaImagen}" alt="${product.nombre}">${createBadgeHTML(product.etiqueta)}</div><h3>${product.nombre}</h3><div class="price-container"><span class="current-price">S/ ${product.precioActual}</span></div></div></a>`;
+                relatedContainer.innerHTML += `<a href="product.html?id=${product.ID_Producto}" class="product-card-link"><div class="product-card"><div class="image-container"><img src="${product.RutaImagen}" alt="${product.NombreProducto}">${createBadgeHTML(product.Etiqueta)}</div><h3>${product.NombreProducto}</h3><div class="price-container"><span class="current-price">S/ ${product.PrecioActual}</span></div></div></a>`;
             });
             setupCardAnimations();
         } else {
             document.querySelector('.related-products-section').style.display = 'none';
         }
     }
+    
+    // --- FUNCIONES AYUDANTES REUTILIZABLES ---
+    
     function setupCardAnimations() {
         const cards = document.querySelectorAll('.product-card');
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
+            entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } });
         }, { threshold: 0.1 });
         cards.forEach(card => observer.observe(card));
     }
+
     function getBadgeClass(text) {
         if (!text) return '';
         const lowerText = text.toLowerCase();
@@ -269,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (lowerText.includes('descuento')) return 'badge-descuento';
         return 'badge-otro';
     }
+
     function createBadgeHTML(text, isDetailPage = false) {
         if (!text) return '';
         const badgeClass = getBadgeClass(text);
