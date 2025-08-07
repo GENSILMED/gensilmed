@@ -238,14 +238,38 @@ document.addEventListener('DOMContentLoaded', function() {
             thumbnailContainer.appendChild(thumb);
         });
     }
-    function setupWhatsAppButton(product) {
-        const whatsappBtn = document.getElementById('whatsapp-btn');
-        const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
-        if (whatsappBtn && whatsappInfo) {
-            const message = encodeURIComponent(`Hola, estoy interesado en el producto: ${product.NombreProducto} (Código: ${product.ID_Producto})`);
+
+    // Reemplaza tu función setupWhatsAppButton existente por esta:
+function setupWhatsAppButton(product) {
+    const whatsappBtn = document.getElementById('whatsapp-btn');
+    const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
+    
+    // Añadimos una referencia al input de cantidad
+    const quantityInput = document.getElementById('quantity-input');
+
+    if (whatsappBtn && whatsappInfo && quantityInput) {
+        // Creamos una función para actualizar el enlace dinámicamente
+        const updateLink = () => {
+            const quantity = parseInt(quantityInput.value);
+            const finalPrice = (parseFloat(product.PrecioActual) * quantity).toFixed(2);
+
+            const message = encodeURIComponent(
+`Hola, estoy interesado en el siguiente producto:
+*Producto:* ${product.NombreProducto}
+*Código:* ${product.ID_Producto}
+*Cantidad:* ${quantity}
+*Precio Final:* S/ ${finalPrice}`
+            );
             whatsappBtn.href = `https://wa.me/${whatsappInfo.Dato1}?text=${message}`;
-        }
+        };
+
+        // Actualizamos el enlace cada vez que el usuario cambie la cantidad
+        quantityInput.addEventListener('change', updateLink);
+        // También lo actualizamos al cargar la página por primera vez
+        updateLink();
     }
+}
+
     const colorMap = { 'rojo': '#e74c3c', 'azul': '#3498db', 'verde': '#2ecc71', 'negro': '#34495e', 'blanco': '#ecf0f1', 'gris': '#95a5a6', 'amarillo': '#f1c40f', 'naranja': '#e67e22', 'morado': '#9b59b6', 'beige': '#f5f5dc', 'verde oscuro': '#006400', 'azul oscuro': '#00008b' };
     function setupColorSwatches(product) {
         const container = document.getElementById('color-options-container');
