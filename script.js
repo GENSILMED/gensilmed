@@ -53,36 +53,56 @@ document.addEventListener('DOMContentLoaded', function() {
         if (productDetailContainer) { initializeProductDetailPage(); }
     }
     
-    // Reemplaza tu función applySiteConfig existente por esta:
+// Reemplaza tu función applySiteConfig existente por esta versión completa:
 function applySiteConfig() {
+    // --- LÓGICA DINÁMICA PARA PÁGINA DE CONTACTO (NUEVA) ---
+    const contactOptionsContainer = document.querySelector('.contact-options');
+    if (contactOptionsContainer) {
+        const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
+        const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
+        let contactItems = [];
+        
+        if (whatsappInfo) contactItems.push(whatsappInfo);
+        contactItems = contactItems.concat(redes);
+
+        let html = '';
+        contactItems.forEach(item => {
+            let title, detail, link, cta;
+            if (item.Tipo === 'whatsapp') {
+                title = 'WhatsApp';
+                detail = `+${item.Dato1}`;
+                link = `https://wa.me/${item.Dato1}`;
+                cta = 'Envíanos un mensaje';
+            } else { // para red_social
+                title = item.Nombre;
+                detail = `@${item.Dato2}`;
+                link = item.Dato1;
+                cta = `Visita nuestro ${item.Nombre}`;
+            }
+
+            const iconClass = `fab fa-${title.toLowerCase()}`;
+            
+            html += `
+                <a href="${link}" class="contact-card" target="_blank" rel="noopener noreferrer">
+                    <i class="${iconClass}"></i>
+                    <h3>${title}</h3>
+                    <p>${detail}</p>
+                    <span>${cta}</span>
+                </a>
+            `;
+        });
+        contactOptionsContainer.innerHTML = html;
+    }
+
     // --- LÓGICA DINÁMICA PARA YAPE/PLIN ---
     const yapePlinContainer = document.getElementById('yape-plin-container');
     if (yapePlinContainer) {
         const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
         const plinInfo = siteConfigData.find(item => item.Tipo === 'plin');
         
-        let html = ''; // Empezamos el HTML vacío
-        
-        // Creamos el bloque para Yape si existe
-        if (yapeInfo) {
-            html += `
-                <div class="payment-method-item">
-                    <img src="imagenes/yape-logo.jpg" alt="Logo Yape" class="payment-logo-single">
-                    <p class="payment-number">${yapeInfo.Dato1}</p>
-                    <p class="payment-name">A nombre de ${yapeInfo.Nombre}</p>
-                </div>
-            `;
-        }
-        // Creamos el bloque para Plin si existe
-        if (plinInfo) {
-            html += `
-                <div class="payment-method-item">
-                    <img src="imagenes/plin-logo.png" alt="Logo Plin" class="payment-logo-single">
-                    <p class="payment-number">${plinInfo.Dato1}</p>
-                    <p class="payment-name">A nombre de ${plinInfo.Nombre}</p>
-                </div>
-            `;
-        }
+        let html = '<div class="payment-logos"><img src="imagenes/yape-logo.png" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
+        if(yapeInfo) html += `<p class="payment-number">${yapeInfo.Dato1}</p><p class="payment-name">A nombre de ${yapeInfo.Nombre}</p>`;
+        if(plinInfo) html += `<p class="payment-number" style="margin-top:10px;">${plinInfo.Dato1}</p><p class="payment-name">A nombre de ${plinInfo.Nombre}</p>`;
         yapePlinContainer.innerHTML = html;
     }
 
@@ -91,21 +111,13 @@ function applySiteConfig() {
     if (bankListContainer) {
         const bancos = siteConfigData.filter(item => item.Tipo === 'banco');
         let html = '';
-        
-        // Creamos un bloque para cada banco individualmente
         bancos.forEach(banco => {
-            html += `
-                <div class="bank-item">
-                    <p><i class="fas fa-university"></i> <strong>${banco.Nombre}:</strong> ${banco.Dato1}</p>
-                    ${banco.Dato2 ? `<p class="payment-name">A nombre de ${banco.Dato2}</p>` : ''}
-                </div>
-            `;
+            html += `<div class="bank-item"><p><i class="fas fa-university"></i> <strong>${banco.Nombre}:</strong> ${banco.Dato1}</p>${banco.Dato2 ? `<p class="payment-name">A nombre de ${banco.Dato2}</p>` : ''}</div>`;
         });
-        
         bankListContainer.innerHTML = html;
     }
 
-    // --- LÓGICA DINÁMICA PARA REDES SOCIALES (sin cambios) ---
+    // --- LÓGICA DINÁMICA PARA REDES SOCIALES (EN FOOTER) ---
     const socialLinksList = document.getElementById('social-links-list');
     if (socialLinksList) {
         const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
