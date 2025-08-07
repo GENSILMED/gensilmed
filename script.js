@@ -60,161 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
             const plinInfo = siteConfigData.find(item => item.Tipo === 'plin');
             let html = '<div class="payment-logos"><img src="imagenes/yape-logo.png" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
-            if(yapeInfo) html += `<p class="payment-number">${yapeInfo.Dato1}</p><p class="payment-name">A nombre de ${yapeInfo.Nombre}</p>`;
-            if(plinInfo) html += `<p class="payment-number" style="margin-top:10px;">${plinInfo.Dato1}</p><p class="payment-name">A nombre de ${plinInfo.Nombre}</p>`;
-            yapePlinContainer.innerHTML = html;
-        }
-        const bankListContainer = document.getElementById('bank-list-container');
-        if (bankListContainer) {
-            const bancos = siteConfigData.filter(item => item.Tipo === 'banco');
-            let html = '';
-            bancos.forEach(banco => {
-                html += `<div class="bank-item"><p><i class="fas fa-university"></i> <strong>${banco.Nombre}:</strong> ${banco.Dato1}</p>${banco.Dato2 ? `<p class="payment-name">A nombre de ${banco.Dato2}</p>` : ''}</div>`;
-            });
-            bankListContainer.innerHTML = html;
-        }
-        const socialLinksList = document.getElementById('social-links-list');
-        if (socialLinksList) {
-            const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
-            let html = '';
-            redes.forEach(red => {
-                let iconClass = `fab fa-${red.Nombre.toLowerCase()}`;
-                if (red.Nombre.toLowerCase() === 'facebook') iconClass += '-f';
-                html += `<li><a href="${red.Dato1}" target="_blank" rel="noopener noreferrer"><i class="${iconClass}"></i><span>${red.Dato2}</span></a></li>`;
-            });
-            const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
-            if (whatsappInfo) {
-                 html = `<li><a href="https://wa.me/${whatsappInfo.Dato1}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i><span>${whatsappInfo.Dato1}</span></a></li>` + html;
-            }
-            socialLinksList.innerHTML = html;
-        }
-    }
-
-    // --- EVENT LISTENERS GLOBALES ---
-    document.addEventListener('dataLoaded', initializeApp);
-    if (hamburgerMenu && navMenu) { hamburgerMenu.addEventListener('click', () => navMenu.classList.toggle('active')); }
-    if (cartIcon) { cartIcon.addEventListener('click', (e) => { e.preventDefault(); if(cartModal) cartModal.classList.add('active'); }); }
-    if (closeModalBtn) { closeModalBtn.addEventListener('click', () => cartModal.classList.remove('active')); }
-    if (clearCartBtn) { clearCartBtn.addEventListener('click', clearCart); }
-    window.addEventListener('click', (e) => { if (e.target === cartModal) cartModal.classList.remove('active'); });
-    document.addEventListener('click', (e) => {
-        const addToCartButton = e.target.closest('.add-to-cart-btn');
-        const removeFromCartButton = e.target.closest('.remove-item-btn');
-        if (addToCartButton) {
-            e.preventDefault();
-            if (allProducts.length === 0) { alert("Los productos aún no han cargado, por favor espera un momento."); return; }
-            const productId = addToCartButton.dataset.productId;
-            const quantityInput = document.getElementById('quantity-input');
-            const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
-            addToCart(productId, quantity);
-        }
-        if (removeFromCartButton) {
-            e.preventDefault();
-            const productId = removeFromCartButton.dataset.productId;
-            removeFromCart(productId);
-        }
-    });
-
-    // --- FUNCIONES DEL CARRITO ---
-    function saveCart() { localStorage.setItem('shoppingCart', JSON.stringify(cart)); }
-    function clearCart() { cart = []; saveCart(); updateCartUI(); }
-    function removeFromCart(productId) { cart = cart.filter(item => item.id !== productId); saveCart(); updateCartUI(); }
-    function addToCart(productId, quantity) {
-        const product = allProducts.find(p => p.ID_Producto === productId);
-        if (!product) return;
-        const existingItem = cart.find(item => item.id === productId);
-        if (existingItem) { existingItem.cantidad += quantity; } 
-        else { cart.push({ id: product.ID_Producto, nombre: product.NombreProducto, precio: product.PrecioActual, imagen: product.RutaImagen, cantidad: quantity }); }
-        saveCart();
-        updateCartUI();
-        alert('¡Producto añadido al carrito!');
-    }
-    function updateCartUI() { /* ... código completo abajo ... */ }
-    function updateWhatsAppLink(totalPrice) { /* ... código completo abajo ... */ }
-    
-    // --- FUNCIONES DE LA PÁGINA PRINCIPAL ---
-    function displayProducts(products) { /* ... código completo abajo ... */ }
-    function createCategoryFilters() { /* ... código completo abajo ... */ }
-    function handleFilterClick(event) { /* ... código completo abajo ... */ }
-
-    // --- FUNCIONES DE LA PÁGINA DE DETALLE ---
-    function initializeProductDetailPage() { /* ... código completo abajo ... */ }
-    function createProductDetailHTML(product) { /* ... código completo abajo ... */ }
-    function setupImageGallery(product) { /* ... código completo abajo ... */ }
-    function setupWhatsAppButton(product) { /* ... código completo abajo ... */ }
-    function setupColorSwatches(product) { /* ... código completo abajo ... */ }
-    function setupQuantityControls() { /* ... código completo abajo ... */ }
-    function displayRelatedProducts(currentProduct) { /* ... código completo abajo ... */ }
-    
-    // --- FUNCIONES AYUDANTES ---
-    function setupCardAnimations() { /* ... código completo abajo ... */ }
-    function getBadgeClass(text) { /* ... código completo abajo ... */ }
-    function createBadgeHTML(text, isDetailPage = false) { /* ... código completo abajo ... */ }
-
-    // --- INICIAMOS LA CARGA DE DATOS ---
-    loadAllData();
-    updateCartUI();
-});
-
-// =========================================================================
-// === CÓDIGO COMPLETO Y FINAL PARA SCRIPT.JS (COPIA Y PEGA TODO ESTO) ===
-// =========================================================================
-document.addEventListener('DOMContentLoaded', function() {
-    
-    const productsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?gid=0&single=true&output=csv';
-    const configURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?gid=1964441751&single=true&output=csv'; 
-    let allProducts = [];
-    let siteConfigData = [];
-    let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
-
-    const cartIcon = document.querySelector('.cart-icon');
-    const cartCounter = document.querySelector('.cart-counter');
-    const cartModal = document.getElementById('cart-modal');
-    const closeModalBtn = document.querySelector('.close-modal');
-    const cartItemsContainer = document.getElementById('cart-items-container');
-    const cartTotalPriceEl = document.getElementById('cart-total-price');
-    const whatsappCheckoutBtn = document.getElementById('whatsapp-checkout-btn');
-    const clearCartBtn = document.getElementById('clear-cart-btn');
-    const hamburgerMenu = document.querySelector('.hamburger-menu');
-    const navMenu = document.querySelector('.nav-menu');
-    const productContainer = document.getElementById('product-list');
-    const filterContainer = document.querySelector('.filter-container');
-    const productDetailContainer = document.getElementById('product-detail-content');
-    const yearSpan = document.getElementById('current-year');
-
-    function loadAllData() {
-        Promise.all([
-            fetch(productsURL).then(res => res.text()),
-            fetch(configURL).then(res => res.text())
-        ])
-        .then(([productsCSV, configCSV]) => {
-            Papa.parse(productsCSV, {
-                header: true,
-                complete: (results) => { allProducts = results.data.filter(p => p.Estado === 'Activo' && p.ID_Producto); }
-            });
-            Papa.parse(configCSV, {
-                header: true,
-                complete: (results) => { siteConfigData = results.data; }
-            });
-            document.dispatchEvent(new CustomEvent('dataLoaded'));
-        })
-        .catch(error => console.error('Error al cargar los datos:', error));
-    }
-
-    function initializeApp() {
-        applySiteConfig();
-        updateCartUI();
-        if (yearSpan) { yearSpan.textContent = new Date().getFullYear(); }
-        if (productContainer) { displayProducts(allProducts); createCategoryFilters(); }
-        if (productDetailContainer) { initializeProductDetailPage(); }
-    }
-    
-    function applySiteConfig() {
-        const yapePlinContainer = document.getElementById('yape-plin-container');
-        if (yapePlinContainer) {
-            const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
-            const plinInfo = siteConfigData.find(item => item.Tipo === 'plin');
-            let html = '<div class="payment-logos"><img src="imagenes/yape-logo.png" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
             if(yapeInfo) html += `<div class="payment-method-item"><h4>Yape</h4><p class="payment-number">${yapeInfo.Dato1}</p><p class="payment-name">A nombre de ${yapeInfo.Nombre}</p></div>`;
             if(plinInfo) html += `<div class="payment-method-item"><h4>Plin</h4><p class="payment-number">${plinInfo.Dato1}</p><p class="payment-name">A nombre de ${plinInfo.Nombre}</p></div>`;
             yapePlinContainer.innerHTML = html;
@@ -245,12 +90,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // --- EVENT LISTENERS GLOBALES ---
     document.addEventListener('dataLoaded', initializeApp);
-    if (hamburgerMenu && navMenu) { hamburgerMenu.addEventListener('click', () => navMenu.classList.toggle('active')); }
-    if (cartIcon) { cartIcon.addEventListener('click', (e) => { e.preventDefault(); if(cartModal) cartModal.classList.add('active'); }); }
-    if (closeModalBtn) { closeModalBtn.addEventListener('click', () => cartModal.classList.remove('active')); }
-    if (clearCartBtn) { clearCartBtn.addEventListener('click', clearCart); }
-    window.addEventListener('click', (e) => { if (e.target === cartModal) cartModal.classList.remove('active'); });
+    
+    // CORRECCIÓN: LÓGICA DEL MENÚ DE HAMBURGUESA RESTAURADA AQUÍ
+    if (hamburgerMenu && navMenu) {
+        hamburgerMenu.addEventListener('click', () => navMenu.classList.toggle('active'));
+    }
+
+    if (cartIcon) {
+        cartIcon.addEventListener('click', (e) => { e.preventDefault(); if(cartModal) cartModal.classList.add('active'); });
+    }
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => cartModal.classList.remove('active'));
+    }
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', clearCart);
+    }
+    window.addEventListener('click', (e) => {
+        if (e.target === cartModal) cartModal.classList.remove('active');
+    });
     document.addEventListener('click', (e) => {
         const addToCartButton = e.target.closest('.add-to-cart-btn');
         const removeFromCartButton = e.target.closest('.remove-item-btn');
@@ -269,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // --- FUNCIONES DEL CARRITO ---
     function saveCart() { localStorage.setItem('shoppingCart', JSON.stringify(cart)); }
     function clearCart() { cart = []; saveCart(); updateCartUI(); }
     function removeFromCart(productId) { cart = cart.filter(item => item.id !== productId); saveCart(); updateCartUI(); }
@@ -317,6 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         whatsappCheckoutBtn.href = whatsappURL;
     }
 
+    // --- FUNCIONES DE LA PÁGINA PRINCIPAL ---
     function displayProducts(products) {
         if (!productContainer) return;
         productContainer.innerHTML = '';
@@ -325,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function createCategoryFilters() {
         if (!filterContainer) return;
-        const categories = ['TODO', ...new Set(allProducts.map(product => product.Categoria))];
+        const categories = ['TODO', ...new Set(allProducts.map(p => p.Categoria))];
         filterContainer.innerHTML = '';
         categories.forEach(category => {
             const button = document.createElement('button');
@@ -345,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
         displayProducts(filteredProducts);
     }
 
+    // --- FUNCIONES DE LA PÁGINA DE DETALLE ---
     function initializeProductDetailPage() {
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
@@ -428,6 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // --- FUNCIONES AYUDANTES ---
     function setupCardAnimations() {
         const cards = document.querySelectorAll('.product-card');
         const observer = new IntersectionObserver((entries) => {
@@ -450,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return `<div class="product-badge ${badgeClass}" style="${style}">${text}</div>`;
     }
     
+    // --- INICIAMOS LA CARGA DE DATOS ---
     loadAllData();
     updateCartUI();
 });
