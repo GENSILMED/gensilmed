@@ -72,41 +72,55 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // --- FUNCIÓN QUE FALTABA PARA APLICAR LA CONFIGURACIÓN ---
+   // --- VERSIÓN RECONSTRUIDA DE applySiteConfig ---
     function applySiteConfig() {
-        // --- SECCIÓN: CONTACTO.HTML - MEDIOS DE PAGO ---
-        const yapePlinNumbers = document.getElementById('yape-plin-numbers');
-        const yapePlinNames = document.getElementById('yape-plin-names');
-        if (yapePlinNumbers && siteConfig.yape_numero && siteConfig.plin_numero) {
-            yapePlinNumbers.textContent = `Yape: ${siteConfig.yape_numero.Valor1} / Plin: ${siteConfig.plin_numero.Valor1}`;
-            yapePlinNames.textContent = `Yape: a nombre de ${siteConfig.yape_titular.Valor2} / Plin: a nombre de ${siteConfig.plin_titular.Valor2}`;
+        // --- LÓGICA PARA YAPE/PLIN ---
+        const yapePlinContainer = document.getElementById('yape-plin-container');
+        if (yapePlinContainer) {
+            const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
+            const plinInfo = siteConfigData.find(item => item.Tipo === 'plin');
+            
+            let html = '<div class="payment-logos"><img src="imagenes/yape-logo.png" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
+            if(yapeInfo) html += `<p class="payment-number">${yapeInfo['DatoPrincipal (Número/Enlace)']}</p><p class="payment-name">A nombre de ${yapeInfo['Nombre / Red Social']}</p>`;
+            if(plinInfo) html += `<p class="payment-number" style="margin-top:10px;">${plinInfo['DatoPrincipal (Número/Enlace)']}</p><p class="payment-name">A nombre de ${plinInfo['Nombre / Red Social']}</p>`;
+            yapePlinContainer.innerHTML = html;
         }
-        
-        const bancoNacion = document.getElementById('banco-nacion-numero');
-        if (bancoNacion && siteConfig.banco_nacion_numero) bancoNacion.textContent = siteConfig.banco_nacion_numero.Valor1;
-        
-        const bancoBcp = document.getElementById('banco-bcp-numero');
-        if (bancoBcp && siteConfig.banco_bcp_numero) bancoBcp.textContent = siteConfig.banco_bcp_numero.Valor1;
 
-        const bancoTitular = document.getElementById('banco-titular');
-        if (bancoTitular && siteConfig.banco_titular) bancoTitular.textContent = `A nombre de ${siteConfig.banco_titular.Valor2}`;
+        // --- LÓGICA PARA BANCOS ---
+        const bankListContainer = document.getElementById('bank-list-container');
+        if (bankListContainer) {
+            const bancos = siteConfigData.filter(item => item.Tipo === 'banco');
+            let html = '';
+            bancos.forEach(banco => {
+                html += `<p><i class="fas fa-university"></i> <strong>${banco['Nombre / Red Social']}:</strong> ${banco['DatoPrincipal (Número/Enlace)']}</p>`;
+            });
+            // Añadimos el titular al final si existe
+            const titularBanco = bancos.length > 0 ? bancos[0]['Dato Secundario (Titular)'] : '';
+            if(titularBanco) html += `<p class="payment-name" style="margin-top:15px;">A nombre de ${titularBanco}</p>`;
+            
+            bankListContainer.innerHTML = html;
+        }
 
-        // --- SECCIÓN: FOOTER Y REDES SOCIALES ---
-        document.querySelectorAll('a[data-social]').forEach(link => {
-            const socialNetwork = link.dataset.social;
-            const configKey = `${socialNetwork}_enlace`;
-            if (siteConfig[configKey]) {
-                link.href = siteConfig[configKey].Valor1;
-                const span = link.querySelector('span');
-                if (span && siteConfig[configKey].Valor2) span.textContent = siteConfig[configKey].Valor2;
-            }
-        });
-        
-         const whatsappDisplayNumber = document.getElementById('whatsapp-display-number');
-         if(whatsappDisplayNumber && siteConfig.whatsapp_numero){
-            whatsappDisplayNumber.textContent = siteConfig.whatsapp_numero.Valor1;
-            const parentLink = whatsappDisplayNumber.closest('a');
-            if (parentLink) parentLink.href = `https://wa.me/${siteConfig.whatsapp_numero.Valor1}`;
-         }
+         // --- LÓGICA PARA REDES SOCIALES ---
+        const socialLinksList = document.getElementById('social-links-list');
+        if (socialLinksList) {
+            const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
+            let html = '';
+            redes.forEach(red => {
+                let iconClass = `fab fa-${red['Nombre / Red Social'].toLowerCase()}`;
+                if(red['Nombre / Red Social'].toLowerCase() === 'facebook') iconClass += '-f';
+
+                html += `
+                    <li>
+                        <a href="${red['DatoPrincipal (Número/Enlace)']}" target="_blank" rel="noopener noreferrer">
+                            <i class="${iconClass}"></i>
+                            <span>${red['Dato Secundario (Titular)']}</span>
+                        </a>
+                    </li>
+                `;
+            });
+            socialLinksList.innerHTML = html;
+        }
     }
 
 
