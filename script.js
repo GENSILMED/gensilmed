@@ -53,9 +53,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (productDetailContainer) { initializeProductDetailPage(); }
     }
     
-// Reemplaza tu función applySiteConfig existente por esta versión completa:
+// Reemplaza tu función applySiteConfig existente por esta versión final:
 function applySiteConfig() {
-    // --- LÓGICA DINÁMICA PARA PÁGINA DE CONTACTO (NUEVA) ---
+    // --- LÓGICA DINÁMICA PARA PÁGINA DE CONTACTO ---
     const contactOptionsContainer = document.querySelector('.contact-options');
     if (contactOptionsContainer) {
         const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
@@ -68,19 +68,25 @@ function applySiteConfig() {
         let html = '';
         contactItems.forEach(item => {
             let title, detail, link, cta;
+            let iconClass = '';
+
             if (item.Tipo === 'whatsapp') {
                 title = 'WhatsApp';
                 detail = `+${item.Dato1}`;
                 link = `https://wa.me/${item.Dato1}`;
                 cta = 'Envíanos un mensaje';
+                iconClass = 'fab fa-whatsapp';
             } else { // para red_social
                 title = item.Nombre;
                 detail = `@${item.Dato2}`;
                 link = item.Dato1;
                 cta = `Visita nuestro ${item.Nombre}`;
+                // CORRECCIÓN: Lógica para construir la clase del ícono correctamente
+                iconClass = `fab fa-${title.toLowerCase()}`;
+                if (title.toLowerCase() === 'facebook') {
+                    iconClass += '-f'; // Añadimos el '-f' específico para Facebook
+                }
             }
-
-            const iconClass = `fab fa-${title.toLowerCase()}`;
             
             html += `
                 <a href="${link}" class="contact-card" target="_blank" rel="noopener noreferrer">
@@ -94,7 +100,7 @@ function applySiteConfig() {
         contactOptionsContainer.innerHTML = html;
     }
 
-    // --- LÓGICA DINÁMICA PARA YAPE/PLIN ---
+    // --- El resto de la función (Yape/Plin, Bancos, Footer) se mantiene igual ---
     const yapePlinContainer = document.getElementById('yape-plin-container');
     if (yapePlinContainer) {
         const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
@@ -106,7 +112,6 @@ function applySiteConfig() {
         yapePlinContainer.innerHTML = html;
     }
 
-    // --- LÓGICA DINÁMICA PARA BANCOS ---
     const bankListContainer = document.getElementById('bank-list-container');
     if (bankListContainer) {
         const bancos = siteConfigData.filter(item => item.Tipo === 'banco');
@@ -117,7 +122,6 @@ function applySiteConfig() {
         bankListContainer.innerHTML = html;
     }
 
-    // --- LÓGICA DINÁMICA PARA REDES SOCIALES (EN FOOTER) ---
     const socialLinksList = document.getElementById('social-links-list');
     if (socialLinksList) {
         const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
@@ -125,7 +129,6 @@ function applySiteConfig() {
         redes.forEach(red => {
             let iconClass = `fab fa-${red.Nombre.toLowerCase()}`;
             if (red.Nombre.toLowerCase() === 'facebook') iconClass += '-f';
-
             html += `<li><a href="${red.Dato1}" target="_blank" rel="noopener noreferrer"><i class="${iconClass}"></i><span>${red.Dato2}</span></a></li>`;
         });
         const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
