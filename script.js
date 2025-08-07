@@ -53,42 +53,88 @@ document.addEventListener('DOMContentLoaded', function() {
         if (productDetailContainer) { initializeProductDetailPage(); }
     }
     
-    // --- FUNCIÓN PARA APLICAR LA CONFIGURACIÓN DINÁMICA ---
-    function applySiteConfig() {
-        const yapePlinContainer = document.getElementById('yape-plin-container');
-        if (yapePlinContainer) {
-            const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
-            const plinInfo = siteConfigData.find(item => item.Tipo === 'plin');
-            let html = '<div class="payment-logos"><img src="imagenes/yape-logo.jpg" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
-            if(yapeInfo) html += `<div class="payment-method-item"><h4>Yape</h4><p class="payment-number">${yapeInfo.Dato1}</p><p class="payment-name">A nombre de ${yapeInfo.Nombre}</p></div>`;
-            if(plinInfo) html += `<div class="payment-method-item"><h4>Plin</h4><p class="payment-number">${plinInfo.Dato1}</p><p class="payment-name">A nombre de ${plinInfo.Nombre}</p></div>`;
-            yapePlinContainer.innerHTML = html;
-        }
-        const bankListContainer = document.getElementById('bank-list-container');
-        if (bankListContainer) {
-            const bancos = siteConfigData.filter(item => item.Tipo === 'banco');
-            let html = '';
-            bancos.forEach(banco => {
-                html += `<div class="bank-item"><p><i class="fas fa-university"></i> <strong>${banco.Nombre}:</strong> ${banco.Dato1}</p>${banco.Dato2 ? `<p class="payment-name">A nombre de ${banco.Dato2}</p>` : ''}</div>`;
-            });
-            bankListContainer.innerHTML = html;
-        }
-        const socialLinksList = document.getElementById('social-links-list');
-        if (socialLinksList) {
-            const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
-            let html = '';
-            redes.forEach(red => {
-                let iconClass = `fab fa-${red.Nombre.toLowerCase()}`;
-                if (red.Nombre.toLowerCase() === 'facebook') iconClass += '-f';
-                html += `<li><a href="${red.Dato1}" target="_blank" rel="noopener noreferrer"><i class="${iconClass}"></i><span>${red.Dato2}</span></a></li>`;
-            });
-            const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
-            if (whatsappInfo) {
-                 html = `<li><a href="https://wa.me/${whatsappInfo.Dato1}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i><span>${whatsappInfo.Dato1}</span></a></li>` + html;
+  // Reemplaza tu función applySiteConfig existente por esta versión con diagnóstico:
+function applySiteConfig() {
+    
+    // --- LÍNEA DE DIAGNÓSTICO #1 ---
+    console.log("Datos de configuración recibidos:", siteConfigData);
+
+    // --- LÓGICA DINÁMICA PARA PÁGINA DE CONTACTO ---
+    const contactOptionsContainer = document.querySelector('.contact-options');
+    if (contactOptionsContainer) {
+        const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
+        const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
+        
+        // --- LÍNEAS DE DIAGNÓSTICO #2 Y #3 ---
+        console.log("Info de WhatsApp encontrada:", whatsappInfo);
+        console.log("Redes Sociales encontradas:", redes);
+
+        let contactItems = [];
+        if (whatsappInfo) contactItems.push(whatsappInfo);
+        contactItems = contactItems.concat(redes);
+
+        let html = '';
+        contactItems.forEach(item => {
+            let title, detail, link, cta;
+            let iconClass = '';
+
+            if (item.Tipo === 'whatsapp') {
+                title = 'WhatsApp';
+                detail = `+${item.Dato1}`;
+                link = `https://wa.me/${item.Dato1}`;
+                cta = 'Envíanos un mensaje';
+                iconClass = 'fab fa-whatsapp';
+            } else { 
+                title = item.Nombre;
+                detail = `@${item.Dato2}`;
+                link = item.Dato1;
+                cta = `Visita nuestro ${item.Nombre}`;
+                iconClass = `fab fa-${title.toLowerCase()}`;
+                if (title.toLowerCase() === 'facebook') {
+                    iconClass += '-f';
+                }
             }
-            socialLinksList.innerHTML = html;
-        }
+            
+            html += `<a href="${link}" class="contact-card" target="_blank" rel="noopener noreferrer"><i class="${iconClass}"></i><h3>${title}</h3><p>${detail}</p><span>${cta}</span></a>`;
+        });
+        contactOptionsContainer.innerHTML = html;
     }
+
+    // --- El resto de la función (Yape/Plin, Bancos, Footer) se mantiene igual ---
+    const yapePlinContainer = document.getElementById('yape-plin-container');
+    if (yapePlinContainer) {
+        const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
+        const plinInfo = siteConfigData.find(item => item.Tipo === 'plin');
+        let html = '<div class="payment-logos"><img src="imagenes/yape-logo.png" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
+        if(yapeInfo) html += `<div class="payment-method-item"><h4>Yape</h4><p class="payment-number">${yapeInfo.Dato1}</p><p class="payment-name">A nombre de ${yapeInfo.Nombre}</p></div>`;
+        if(plinInfo) html += `<div class="payment-method-item"><h4>Plin</h4><p class="payment-number">${plinInfo.Dato1}</p><p class="payment-name">A nombre de ${plinInfo.Nombre}</p></div>`;
+        yapePlinContainer.innerHTML = html;
+    }
+    const bankListContainer = document.getElementById('bank-list-container');
+    if (bankListContainer) {
+        const bancos = siteConfigData.filter(item => item.Tipo === 'banco');
+        let html = '';
+        bancos.forEach(banco => {
+            html += `<div class="bank-item"><p><i class="fas fa-university"></i> <strong>${banco.Nombre}:</strong> ${banco.Dato1}</p>${banco.Dato2 ? `<p class="payment-name">A nombre de ${banco.Dato2}</p>` : ''}</div>`;
+        });
+        bankListContainer.innerHTML = html;
+    }
+    const socialLinksList = document.getElementById('social-links-list');
+    if (socialLinksList) {
+        const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
+        let html = '';
+        redes.forEach(red => {
+            let iconClass = `fab fa-${red.Nombre.toLowerCase()}`;
+            if (red.Nombre.toLowerCase() === 'facebook') iconClass += '-f';
+            html += `<li><a href="${red.Dato1}" target="_blank" rel="noopener noreferrer"><i class="${iconClass}"></i><span>${red.Dato2}</span></a></li>`;
+        });
+        const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
+        if (whatsappInfo) {
+             html = `<li><a href="https://wa.me/${whatsappInfo.Dato1}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i><span>${whatsappInfo.Dato1}</span></a></li>` + html;
+        }
+        socialLinksList.innerHTML = html;
+    }
+}
 
     // --- EVENT LISTENERS GLOBALES ---
     document.addEventListener('dataLoaded', initializeApp);
