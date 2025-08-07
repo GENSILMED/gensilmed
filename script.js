@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (productDetailContainer) { initializeProductDetailPage(); }
     }
     
-   // Reemplaza tu función applySiteConfig existente por esta:
+    // Reemplaza tu función applySiteConfig existente por esta:
 function applySiteConfig() {
     // --- LÓGICA DINÁMICA PARA YAPE/PLIN ---
     const yapePlinContainer = document.getElementById('yape-plin-container');
@@ -61,9 +61,28 @@ function applySiteConfig() {
         const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
         const plinInfo = siteConfigData.find(item => item.Tipo === 'plin');
         
-        let html = '<div class="payment-logos"><img src="imagenes/yape-logo.png" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
-        if(yapeInfo) html += `<p class="payment-number">${yapeInfo.Dato1}</p><p class="payment-name">A nombre de ${yapeInfo.Nombre}</p>`;
-        if(plinInfo) html += `<p class="payment-number" style="margin-top:10px;">${plinInfo.Dato1}</p><p class="payment-name">A nombre de ${plinInfo.Nombre}</p>`;
+        let html = ''; // Empezamos el HTML vacío
+        
+        // Creamos el bloque para Yape si existe
+        if (yapeInfo) {
+            html += `
+                <div class="payment-method-item">
+                    <img src="imagenes/yape-logo.png" alt="Logo Yape" class="payment-logo-single">
+                    <p class="payment-number">${yapeInfo.Dato1}</p>
+                    <p class="payment-name">A nombre de ${yapeInfo.Nombre}</p>
+                </div>
+            `;
+        }
+        // Creamos el bloque para Plin si existe
+        if (plinInfo) {
+            html += `
+                <div class="payment-method-item">
+                    <img src="imagenes/plin-logo.png" alt="Logo Plin" class="payment-logo-single">
+                    <p class="payment-number">${plinInfo.Dato1}</p>
+                    <p class="payment-name">A nombre de ${plinInfo.Nombre}</p>
+                </div>
+            `;
+        }
         yapePlinContainer.innerHTML = html;
     }
 
@@ -72,23 +91,28 @@ function applySiteConfig() {
     if (bankListContainer) {
         const bancos = siteConfigData.filter(item => item.Tipo === 'banco');
         let html = '';
+        
+        // Creamos un bloque para cada banco individualmente
         bancos.forEach(banco => {
-            html += `<p><i class="fas fa-university"></i> <strong>${banco.Nombre}:</strong> ${banco.Dato1}</p>`;
+            html += `
+                <div class="bank-item">
+                    <p><i class="fas fa-university"></i> <strong>${banco.Nombre}:</strong> ${banco.Dato1}</p>
+                    ${banco.Dato2 ? `<p class="payment-name">A nombre de ${banco.Dato2}</p>` : ''}
+                </div>
+            `;
         });
-        const titularBanco = bancos.find(b => b.Dato2);
-        if(titularBanco) html += `<p class="payment-name" style="margin-top:15px;">A nombre de ${titularBanco.Dato2}</p>`;
         
         bankListContainer.innerHTML = html;
     }
 
-    // --- LÓGICA DINÁMICA PARA REDES SOCIALES ---
+    // --- LÓGICA DINÁMICA PARA REDES SOCIALES (sin cambios) ---
     const socialLinksList = document.getElementById('social-links-list');
     if (socialLinksList) {
         const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
         let html = '';
         redes.forEach(red => {
             let iconClass = `fab fa-${red.Nombre.toLowerCase()}`;
-            if(red.Nombre.toLowerCase() === 'facebook') iconClass += '-f';
+            if (red.Nombre.toLowerCase() === 'facebook') iconClass += '-f';
 
             html += `<li><a href="${red.Dato1}" target="_blank" rel="noopener noreferrer"><i class="${iconClass}"></i><span>${red.Dato2}</span></a></li>`;
         });
@@ -99,7 +123,7 @@ function applySiteConfig() {
         socialLinksList.innerHTML = html;
     }
 }
-   
+
     // --- EVENT LISTENERS GLOBALES ---
     document.addEventListener('dataLoaded', initializeApp);
     

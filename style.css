@@ -618,6 +618,35 @@ input[type=number]::-webkit-outer-spin-button {
     text-align: left;
 }
 
+
+/* --- AJUSTES PARA LA NUEVA ESTRUCTURA DE PAGOS --- */
+
+/* Contenedor para cada item de Yape/Plin */
+.payment-method-item {
+    display: flex;
+    flex-direction: column; /* Apila logo, número y nombre */
+    align-items: center; /* Centra todo */
+    margin-bottom: 20px;
+}
+
+.payment-logo-single {
+    height: 40px;
+    margin-bottom: 10px;
+}
+
+/* Contenedor para cada item de Banco */
+.bank-item {
+    margin-bottom: 20px; /* Añade espacio entre cada banco */
+}
+
+/* Ajustamos el nombre del titular para que no esté en itálica */
+.payment-name {
+    font-style: normal;
+    font-size: 15px;
+    color: #666;
+    margin-top: 5px;
+}
+
 @media (max-width: 768px) {
     .payment-container {
         grid-template-columns: 1fr; /* Una sola columna en móviles */
