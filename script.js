@@ -67,7 +67,7 @@ function applySiteConfig() {
         if (yapeInfo) {
             html += `
                 <div class="payment-method-item">
-                    <img src="imagenes/yape-logo.png" alt="Logo Yape" class="payment-logo-single">
+                    <img src="imagenes/yape-logo.jpg" alt="Logo Yape" class="payment-logo-single">
                     <p class="payment-number">${yapeInfo.Dato1}</p>
                     <p class="payment-name">A nombre de ${yapeInfo.Nombre}</p>
                 </div>
