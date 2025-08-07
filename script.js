@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const configURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSspDYo7SSi2msZURs5tUzGzg7TBuOSVW0_4yS7SnoGnuln5dXQ1bCh8oRa3FVGLwDKzuh85iLNzADe/pub?gid=1964441751&single=true&output=csv'; 
 
     let allProducts = [];
-    let siteConfig = {};
+    let siteConfigData = []; // Usaremos un array para la configuración dinámica
     let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
 
     // --- ELEMENTOS DEL DOM ---
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const productDetailContainer = document.getElementById('product-detail-content');
     const yearSpan = document.getElementById('current-year');
 
-    // --- CARGA INICIAL DE DATOS ---
+    // --- CARGA DE DATOS ---
     function loadAllData() {
         Promise.all([
             fetch(productsURL).then(res => res.text()),
@@ -33,48 +33,29 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(([productsCSV, configCSV]) => {
             Papa.parse(productsCSV, {
                 header: true,
-                complete: (results) => {
-                    allProducts = results.data.filter(p => p.Estado === 'Activo' && p.ID_Producto);
-                }
+                complete: (results) => { allProducts = results.data.filter(p => p.Estado === 'Activo' && p.ID_Producto); }
             });
-
             Papa.parse(configCSV, {
                 header: true,
-                complete: (results) => {
-                    results.data.forEach(item => { siteConfig[item.Clave] = item; });
-                }
+                complete: (results) => { siteConfigData = results.data; } // Guardamos el array completo
             });
             document.dispatchEvent(new CustomEvent('dataLoaded'));
         })
         .catch(error => console.error('Error al cargar los datos:', error));
     }
 
-    // --- FUNCIÓN PRINCIPAL DE INICIALIZACIÓN ---
+    // --- INICIALIZACIÓN DE LA APP ---
     function initializeApp() {
         applySiteConfig();
         updateCartUI();
-        
-        if (hamburgerMenu && navMenu) {
-            hamburgerMenu.addEventListener('click', () => navMenu.classList.toggle('active'));
-        }
-
-        if (productContainer) {
-            displayProducts(allProducts);
-            createCategoryFilters();
-        }
-        if (productDetailContainer) {
-            initializeProductDetailPage();
-        }
-
-        if (yearSpan) {
-            yearSpan.textContent = new Date().getFullYear();
-        }
+        if (yearSpan) { yearSpan.textContent = new Date().getFullYear(); }
+        if (productContainer) { displayProducts(allProducts); createCategoryFilters(); }
+        if (productDetailContainer) { initializeProductDetailPage(); }
     }
     
-    // --- FUNCIÓN QUE FALTABA PARA APLICAR LA CONFIGURACIÓN ---
-   // --- VERSIÓN RECONSTRUIDA DE applySiteConfig ---
+    // --- FUNCIÓN PARA APLICAR LA CONFIGURACIÓN DINÁMICA ---
     function applySiteConfig() {
-        // --- LÓGICA PARA YAPE/PLIN ---
+        // --- LÓGICA DINÁMICA PARA YAPE/PLIN ---
         const yapePlinContainer = document.getElementById('yape-plin-container');
         if (yapePlinContainer) {
             const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
@@ -86,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
             yapePlinContainer.innerHTML = html;
         }
 
-        // --- LÓGICA PARA BANCOS ---
+        // --- LÓGICA DINÁMICA PARA BANCOS ---
         const bankListContainer = document.getElementById('bank-list-container');
         if (bankListContainer) {
             const bancos = siteConfigData.filter(item => item.Tipo === 'banco');
@@ -94,14 +75,13 @@ document.addEventListener('DOMContentLoaded', function() {
             bancos.forEach(banco => {
                 html += `<p><i class="fas fa-university"></i> <strong>${banco['Nombre / Red Social']}:</strong> ${banco['DatoPrincipal (Número/Enlace)']}</p>`;
             });
-            // Añadimos el titular al final si existe
-            const titularBanco = bancos.length > 0 ? bancos[0]['Dato Secundario (Titular)'] : '';
-            if(titularBanco) html += `<p class="payment-name" style="margin-top:15px;">A nombre de ${titularBanco}</p>`;
+            const titularBanco = bancos.find(b => b['Dato Secundario (Titular)']);
+            if(titularBanco) html += `<p class="payment-name" style="margin-top:15px;">A nombre de ${titularBanco['Dato Secundario (Titular)']}</p>`;
             
             bankListContainer.innerHTML = html;
         }
 
-         // --- LÓGICA PARA REDES SOCIALES ---
+        // --- LÓGICA DINÁMICA PARA REDES SOCIALES ---
         const socialLinksList = document.getElementById('social-links-list');
         if (socialLinksList) {
             const redes = siteConfigData.filter(item => item.Tipo === 'red_social');
@@ -110,23 +90,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 let iconClass = `fab fa-${red['Nombre / Red Social'].toLowerCase()}`;
                 if(red['Nombre / Red Social'].toLowerCase() === 'facebook') iconClass += '-f';
 
-                html += `
-                    <li>
-                        <a href="${red['DatoPrincipal (Número/Enlace)']}" target="_blank" rel="noopener noreferrer">
-                            <i class="${iconClass}"></i>
-                            <span>${red['Dato Secundario (Titular)']}</span>
-                        </a>
-                    </li>
-                `;
+                html += `<li><a href="${red['DatoPrincipal (Número/Enlace)']}" target="_blank" rel="noopener noreferrer"><i class="${iconClass}"></i><span>${red['Dato Secundario (Titular)']}</span></a></li>`;
             });
+            // Añadimos el WhatsApp estático que también está en la hoja
+            const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
+            if (whatsappInfo) {
+                 html = `<li><a href="https://wa.me/${whatsappInfo['DatoPrincipal (Número/Enlace)']}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i><span>${whatsappInfo['DatoPrincipal (Número/Enlace)']}</span></a></li>` + html;
+            }
             socialLinksList.innerHTML = html;
         }
     }
-
-
+    
     // --- EVENT LISTENERS GLOBALES ---
     document.addEventListener('dataLoaded', initializeApp);
     
+    if (hamburgerMenu && navMenu) {
+        hamburgerMenu.addEventListener('click', () => navMenu.classList.toggle('active'));
+    }
     if (cartIcon) {
         cartIcon.addEventListener('click', (e) => { e.preventDefault(); if(cartModal) cartModal.classList.add('active'); });
     }
@@ -139,19 +119,17 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('click', (e) => {
         if (e.target === cartModal) cartModal.classList.remove('active');
     });
-
     document.addEventListener('click', (e) => {
         const addToCartButton = e.target.closest('.add-to-cart-btn');
         const removeFromCartButton = e.target.closest('.remove-item-btn');
-
         if (addToCartButton) {
             e.preventDefault();
+            if (allProducts.length === 0) { alert("Los productos aún no han cargado, por favor espera un momento."); return; }
             const productId = addToCartButton.dataset.productId;
             const quantityInput = document.getElementById('quantity-input');
             const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
             addToCart(productId, quantity);
         }
-
         if (removeFromCartButton) {
             e.preventDefault();
             const productId = removeFromCartButton.dataset.productId;
@@ -160,7 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- FUNCIONES DEL CARRITO ---
-    
     function saveCart() { localStorage.setItem('shoppingCart', JSON.stringify(cart)); }
     function clearCart() { cart = []; saveCart(); updateCartUI(); }
     function removeFromCart(productId) { cart = cart.filter(item => item.id !== productId); saveCart(); updateCartUI(); }
@@ -168,11 +145,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const product = allProducts.find(p => p.ID_Producto === productId);
         if (!product) return;
         const existingItem = cart.find(item => item.id === productId);
-        if (existingItem) {
-            existingItem.cantidad += quantity;
-        } else {
-            cart.push({ id: product.ID_Producto, nombre: product.NombreProducto, precio: product.PrecioActual, imagen: product.RutaImagen, cantidad: quantity });
-        }
+        if (existingItem) { existingItem.cantidad += quantity; } 
+        else { cart.push({ id: product.ID_Producto, nombre: product.NombreProducto, precio: product.PrecioActual, imagen: product.RutaImagen, cantidad: quantity }); }
         saveCart();
         updateCartUI();
         alert('¡Producto añadido al carrito!');
@@ -202,13 +176,13 @@ document.addEventListener('DOMContentLoaded', function() {
         updateWhatsAppLink(totalPrice);
     }
     function updateWhatsAppLink(totalPrice) {
-        if (!whatsappCheckoutBtn || !siteConfig.whatsapp_numero) return;
+        if (!whatsappCheckoutBtn) return;
+        const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
+        if (!whatsappInfo) return;
         let message = 'Hola, estoy interesado en realizar el siguiente pedido:\n\n';
-        cart.forEach(item => {
-            message += `*Producto:* ${item.nombre}\n*Código:* ${item.id}\n*Cantidad:* ${item.cantidad}\n*Subtotal:* S/ ${(parseFloat(item.precio) * item.cantidad).toFixed(2)}\n\n`;
-        });
+        cart.forEach(item => { message += `*Producto:* ${item.nombre}\n*Código:* ${item.id}\n*Cantidad:* ${item.cantidad}\n*Subtotal:* S/ ${(parseFloat(item.precio) * item.cantidad).toFixed(2)}\n\n`; });
         message += `*TOTAL DEL PEDIDO:* S/ ${totalPrice.toFixed(2)}`;
-        const whatsappURL = `https://wa.me/${siteConfig.whatsapp_numero.Valor1}?text=${encodeURIComponent(message)}`;
+        const whatsappURL = `https://wa.me/${whatsappInfo['DatoPrincipal (Número/Enlace)']}?text=${encodeURIComponent(message)}`;
         whatsappCheckoutBtn.href = whatsappURL;
     }
 
@@ -216,14 +190,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayProducts(products) {
         if (!productContainer) return;
         productContainer.innerHTML = '';
-        products.forEach(product => {
-            productContainer.innerHTML += `<a href="product.html?id=${product.ID_Producto}" class="product-card-link"><div class="product-card"><div class="image-container"><img src="${product.RutaImagen}" alt="${product.NombreProducto}">${createBadgeHTML(product.Etiqueta)}</div><p class="category">${product.Categoria}</p><h3>${product.NombreProducto}</h3><p class="description">${product.Descripcion}</p><div class="price-container">${product.PrecioAnterior ? `<span class="old-price">S/ ${product.PrecioAnterior}</span>` : ''}<span class="current-price">S/ ${product.PrecioActual}</span></div><button class="add-to-cart-btn" data-product-id="${product.ID_Producto}">Añadir al carrito</button></div></a>`;
-        });
+        products.forEach(product => { productContainer.innerHTML += `<a href="product.html?id=${product.ID_Producto}" class="product-card-link"><div class="product-card"><div class="image-container"><img src="${product.RutaImagen}" alt="${product.NombreProducto}">${createBadgeHTML(product.Etiqueta)}</div><p class="category">${product.Categoria}</p><h3>${product.NombreProducto}</h3><p class="description">${product.Descripcion}</p><div class="price-container">${product.PrecioAnterior ? `<span class="old-price">S/ ${product.PrecioAnterior}</span>` : ''}<span class="current-price">S/ ${product.PrecioActual}</span></div><button class="add-to-cart-btn" data-product-id="${product.ID_Producto}">Añadir al carrito</button></div></a>`; });
         setupCardAnimations();
     }
     function createCategoryFilters() {
         if (!filterContainer) return;
-        const categories = ['TODO', ...new Set(allProducts.map(p => p.Categoria))];
+        const categories = ['TODO', ...new Set(allProducts.map(product => product.Categoria))];
         filterContainer.innerHTML = '';
         categories.forEach(category => {
             const button = document.createElement('button');
@@ -256,9 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setupColorSwatches(product);
             setupQuantityControls();
             displayRelatedProducts(product);
-        } else {
-            productDetailContainer.innerHTML = '<h2>Producto no encontrado</h2>';
-        }
+        } else { productDetailContainer.innerHTML = '<h2>Producto no encontrado</h2>'; }
     }
     function createProductDetailHTML(product) {
         return `<div class="product-detail-container"><div class="product-gallery"><div class="main-image-container"><img src="${product.RutaImagen}" alt="${product.NombreProducto}" id="main-product-image"></div><div class="thumbnail-container" id="thumbnail-container"></div></div><div class="product-info">${createBadgeHTML(product.Etiqueta, true)}<h1>${product.NombreProducto}</h1><p class="product-code">Código: ${product.ID_Producto}</p><div class="price-container" style="margin-bottom: 20px;">${product.PrecioAnterior ? `<span class="old-price">S/ ${product.PrecioAnterior}</span>` : ''}<span class="current-price" id="product-price">S/ ${product.PrecioActual}</span></div><p class="description-full">${product.Descripcion}</p><div class="product-options"><div class="color-options" id="color-options-container"></div><div class="quantity-section"><h4>Cantidad:</h4><div class="purchase-controls"><div class="quantity-selector"><button id="decrease-qty">-</button><input type="number" id="quantity-input" value="1" min="1" readonly><button id="increase-qty">+</button></div></div></div></div><div class="action-buttons"><button class="add-to-cart-btn" data-product-id="${product.ID_Producto}">Añadir al carrito</button><a href="#" id="whatsapp-btn" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Pedir por WhatsApp</a></div></div></div>`;
@@ -271,21 +241,18 @@ document.addEventListener('DOMContentLoaded', function() {
         thumbnailContainer.innerHTML = '';
         images.forEach((imgSrc, index) => {
             const thumb = document.createElement('img');
-            thumb.src = imgSrc;
+            thumb.src = imgSrc.trim();
             if (index === 0) thumb.classList.add('active');
-            thumb.addEventListener('click', () => {
-                mainImage.src = imgSrc;
-                document.querySelectorAll('.thumbnail-container img').forEach(t => t.classList.remove('active'));
-                thumb.classList.add('active');
-            });
+            thumb.addEventListener('click', () => { mainImage.src = imgSrc.trim(); document.querySelectorAll('.thumbnail-container img').forEach(t => t.classList.remove('active')); thumb.classList.add('active'); });
             thumbnailContainer.appendChild(thumb);
         });
     }
     function setupWhatsAppButton(product) {
         const whatsappBtn = document.getElementById('whatsapp-btn');
-        if (whatsappBtn && siteConfig.whatsapp_numero) {
+        const whatsappInfo = siteConfigData.find(item => item.Tipo === 'whatsapp');
+        if (whatsappBtn && whatsappInfo) {
             const message = encodeURIComponent(`Hola, estoy interesado en el producto: ${product.NombreProducto} (Código: ${product.ID_Producto})`);
-            whatsappBtn.href = `https://wa.me/${siteConfig.whatsapp_numero.Valor1}?text=${message}`;
+            whatsappBtn.href = `https://wa.me/${whatsappInfo['DatoPrincipal (Número/Enlace)']}?text=${message}`;
         }
     }
     const colorMap = { 'rojo': '#e74c3c', 'azul': '#3498db', 'verde': '#2ecc71', 'negro': '#34495e', 'blanco': '#ecf0f1', 'gris': '#95a5a6', 'amarillo': '#f1c40f', 'naranja': '#e67e22', 'morado': '#9b59b6', 'beige': '#f5f5dc', 'verde oscuro': '#006400', 'azul oscuro': '#00008b' };
@@ -319,6 +286,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!relatedContainer) return;
         const relatedProducts = allProducts.filter(p => p.Categoria === currentProduct.Categoria && p.ID_Producto !== currentProduct.ID_Producto).slice(0, 4);
         if (relatedProducts.length > 0) {
+            const relatedSection = document.querySelector('.related-products-section');
+            if(relatedSection) relatedSection.style.display = 'block';
             relatedContainer.innerHTML = '';
             relatedProducts.forEach(product => {
                 relatedContainer.innerHTML += `<a href="product.html?id=${product.ID_Producto}" class="product-card-link"><div class="product-card"><div class="image-container"><img src="${product.RutaImagen}" alt="${product.NombreProducto}">${createBadgeHTML(product.Etiqueta)}</div><h3>${product.NombreProducto}</h3><div class="price-container"><span class="current-price">S/ ${product.PrecioActual}</span></div></div></a>`;
@@ -352,7 +321,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const style = isDetailPage ? 'position: static; display: inline-block; margin-bottom: 15px;' : '';
         return `<div class="product-badge ${badgeClass}" style="${style}">${text}</div>`;
     }
-
-    // Llamada inicial para cargar los datos
+    
+    // --- INICIAMOS LA CARGA DE DATOS ---
     loadAllData();
+    updateCartUI(); // Carga inicial del carrito desde localStorage
 });
