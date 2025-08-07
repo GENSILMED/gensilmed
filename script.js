@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (yapePlinContainer) {
             const yapeInfo = siteConfigData.find(item => item.Tipo === 'yape');
             const plinInfo = siteConfigData.find(item => item.Tipo === 'plin');
-            let html = '<div class="payment-logos"><img src="imagenes/yape-logo.png" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
+            let html = '<div class="payment-logos"><img src="imagenes/yape-logo.jpg" alt="Logo Yape"><img src="imagenes/plin-logo.png" alt="Logo Plin"></div>';
             if(yapeInfo) html += `<div class="payment-method-item"><h4>Yape</h4><p class="payment-number">${yapeInfo.Dato1}</p><p class="payment-name">A nombre de ${yapeInfo.Nombre}</p></div>`;
             if(plinInfo) html += `<div class="payment-method-item"><h4>Plin</h4><p class="payment-number">${plinInfo.Dato1}</p><p class="payment-name">A nombre de ${plinInfo.Nombre}</p></div>`;
             yapePlinContainer.innerHTML = html;
