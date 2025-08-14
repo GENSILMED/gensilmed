@@ -267,9 +267,77 @@ function applySiteConfig() {
             displayRelatedProducts(product);
         } else { productDetailContainer.innerHTML = '<h2>Producto no encontrado</h2>'; }
     }
-    function createProductDetailHTML(product) {
-        return `<div class="product-detail-container"><div class="product-gallery"><div class="main-image-container"><img src="${product.RutaImagen}" alt="${product.NombreProducto}" id="main-product-image"></div><div class="thumbnail-container" id="thumbnail-container"></div></div><div class="product-info">${createBadgeHTML(product.Etiqueta, true)}<h1>${product.NombreProducto}</h1><p class="product-code">Código: ${product.ID_Producto}</p><div class="price-container" style="margin-bottom: 20px;">${product.PrecioAnterior ? `<span class="old-price">S/ ${product.PrecioAnterior}</span>` : ''}<span class="current-price" id="product-price">S/ ${product.PrecioActual}</span></div><p class="description-full">${product.Descripcion}</p><div class="product-options"><div class="color-options" id="color-options-container"></div><div class="quantity-section"><h4>Cantidad:</h4><div class="purchase-controls"><div class="quantity-selector"><button id="decrease-qty">-</button><input type="number" id="quantity-input" value="1" min="1" readonly><button id="increase-qty">+</button></div></div></div></div><div class="action-buttons"><button class="add-to-cart-btn" data-product-id="${product.ID_Producto}">Añadir al carrito</button><a href="#" id="whatsapp-btn" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Pedir por WhatsApp</a></div></div></div>`;
+    
+    // Reemplaza tu función createProductDetailHTML existente por esta:
+function createProductDetailHTML(product) {
+    // --- Nueva lógica para procesar la descripción ---
+    let descriptionHTML = '';
+    if (product.Descripcion) {
+        // Dividimos el texto usando el asterisco (*) como separador
+        const descriptionParts = product.Descripcion.split('*');
+        // La primera parte es el párrafo introductorio
+        const introParagraph = descriptionParts[0].trim();
+        // El resto son los puntos de la lista
+        const featureItems = descriptionParts.slice(1)
+            .map(item => item.trim()) // Quitamos espacios en blanco
+            .filter(item => item) // Quitamos elementos vacíos
+            .map(item => `<li>${item}</li>`) // Convertimos cada uno en un <li>
+            .join(''); // Unimos todo en un solo string
+
+        // Construimos el HTML final para la descripción
+        descriptionHTML = `<p>${introParagraph}</p>`;
+        if (featureItems) {
+            descriptionHTML += `<ul>${featureItems}</ul>`;
+        }
     }
+    // --- Fin de la nueva lógica ---
+
+    return `
+        <div class="product-detail-container">
+            <div class="product-gallery">
+                <div class="main-image-container">
+                    <img src="${product.RutaImagen}" alt="${product.NombreProducto}" id="main-product-image">
+                </div>
+                <div class="thumbnail-container" id="thumbnail-container"></div>
+            </div>
+            <div class="product-info">
+                ${createBadgeHTML(product.Etiqueta, true)}
+                <h1>${product.NombreProducto}</h1>
+                <p class="product-code">Código: ${product.ID_Producto}</p>
+                <div class="price-container" style="margin-bottom: 20px;">
+                    ${product.PrecioAnterior ? `<span class="old-price">S/ ${product.PrecioAnterior}</span>` : ''}
+                    <span class="current-price" id="product-price">S/ ${product.PrecioActual}</span>
+                </div>
+                
+                <div class="product-description-container">
+                    ${descriptionHTML}
+                </div>
+
+                <div class="product-options">
+                    <div class="color-options" id="color-options-container"></div>
+                    <div class="quantity-section">
+                        <h4>Cantidad:</h4>
+                        <div class="purchase-controls">
+                             <div class="quantity-selector">
+                                <button id="decrease-qty">-</button>
+                                <input type="number" id="quantity-input" value="1" min="1" readonly>
+                                <button id="increase-qty">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="add-to-cart-btn" data-product-id="${product.ID_Producto}">Añadir al carrito</button>
+                    <a href="#" id="whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-whatsapp"></i> Pedir por WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
     function setupImageGallery(product) {
         const mainImage = document.getElementById('main-product-image');
         const thumbnailContainer = document.getElementById('thumbnail-container');
